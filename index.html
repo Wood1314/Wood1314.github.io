@@ -297,7 +297,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/30/ck624jc2o00285iu5dvduloex/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/02/02/ck64zr5zz00202du53u7n0t2x/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -316,7 +316,183 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/01/30/ck624jc2o00285iu5dvduloex/" itemprop="url">Tcache Attack 总结</a></h1>
+                <a class="post-title-link" href="/year/02/02/ck64zr5zz00202du53u7n0t2x/" itemprop="url">驱动开发初探</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-02-02T16:23:16+08:00">
+                2020-02-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/环境配置/" itemprop="url" rel="index">
+                    <span itemprop="name">环境配置</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="0x0-前言"><a href="#0x0-前言" class="headerlink" title="0x0 前言"></a>0x0 前言</h2><p>驱动开发的环境配置，以及入门的hello_world<br>参考链接: <a href="https://qwertwwwe.github.io/windows-driver-develop-setup-environment/" target="_blank" rel="noopener">https://qwertwwwe.github.io/windows-driver-develop-setup-environment/</a></p>
+<h2 id="0x1-开发及测试环境"><a href="#0x1-开发及测试环境" class="headerlink" title="0x1 开发及测试环境"></a>0x1 开发及测试环境</h2><p>开发机系统 ： win10, 64位<br>测试机系统： win7, 32位<br>开发软件： visual stdio 2015， （vs2017不支持，反正目前官网上是这么说的）</p>
+<h2 id="0x2-安装相应的开发软件"><a href="#0x2-安装相应的开发软件" class="headerlink" title="0x2 安装相应的开发软件"></a>0x2 安装相应的开发软件</h2><p>官方开发软件下载链接：<br><a href="https://developer.microsoft.com/zh-cn/windows/hardware/windows-driver-kit" target="_blank" rel="noopener">https://developer.microsoft.com/zh-cn/windows/hardware/windows-driver-kit</a><br>按照官网的教程：</p>
+<ol>
+<li>安装vs2015，打开的时候记得安装Visual C++选项。<img src="/year/02/02/ck64zr5zz00202du53u7n0t2x/1.png" alt></li>
+<li>此处可以不选“通用Windows应用开发工具”中的SDK，因为可以从下面的步骤中手动安装。<ol>
+<li>安装 Windows SDK, 直接从官网指定的链接下载安装就行；</li>
+<li>安装 Windows WDK, 同样直接从官网指定的链接下载安装；</li>
+</ol>
+</li>
+</ol>
+<p>记得安装的SDK 和 WDK 的版本号必须完全相同，所以我选择SDK和WDK都从官网给的链接上下载安装，避免vs2015中安装的SDK和自己下载的WDK版本不同。</p>
+<p>当然WDK和SDK下下来的时候是个执行文件，打开后可以选择直接安装或者近下载，反正都行，我选择先下载下来，后面自己安装，比较这么大软件下一次太久~~</p>
+<p>我记得WDK安装的时候会提示什么将无法开发现代应用程序之类的提示，直接接受并继续~~，其实对其他程序开发有什么影响我也不太清楚，反正我这个环境只开发windows驱动程序而已。</p>
+<h2 id="0x3-hello-world程序"><a href="#0x3-hello-world程序" class="headerlink" title="0x3 hello-world程序"></a>0x3 hello-world程序</h2><p>先用vs2015创建一个新项目<br><img src="/year/02/02/ck64zr5zz00202du53u7n0t2x/2.png" alt><br>然后在Source Files中新建代码文件 DriverEntry.c，</p>
+<p><strong>这里注意一定是.c文件。</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;ntddk.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">//DiverUnload是驱动卸载函数，负责清理资源，在卸载驱动的时候调用</span></span><br><span class="line"><span class="function">VOID <span class="title">DriverUnload</span><span class="params">(PDRIVER_OBJECT	pDriverObject)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">//指出这个参数并没有使用而不是我们忘记了，防止编译器报错</span></span><br><span class="line">	UNREFERENCED_PARAMETER(pDriverObject);</span><br><span class="line">	<span class="comment">//表明驱动卸载成功</span></span><br><span class="line">	DbgPrint(<span class="string">"Unload Success"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//驱动的入口函数相当于三环程序的main</span></span><br><span class="line"><span class="comment">//pDvierObject相当于驱动对象指针，pRegPath相当于注册表路径指针</span></span><br><span class="line"><span class="function">NTSTATUS <span class="title">DriverEntry</span><span class="params">(PDRIVER_OBJECT pDriverObject, PUNICODE_STRING pRegPath)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	UNREFERENCED_PARAMETER(pRegPath);</span><br><span class="line"></span><br><span class="line">	<span class="comment">//指定驱动的卸载函数</span></span><br><span class="line">	pDriverObject-&gt;DriverUnload = DriverUnload;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//表明驱动启动成功</span></span><br><span class="line">	DbgPrint(<span class="string">"Hello world"</span>);</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//ANSI_STRING 1.缓冲区 2.字符串长度 3.最大长度</span></span><br><span class="line">	<span class="comment">//UNICODE_STRING 1.缓冲区 2.字符串长度 3.最大长度\x00</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">//1.字符串常量方式初始化</span></span><br><span class="line">	<span class="comment">//1.1 使用WCHAR类型变量进行初始化</span></span><br><span class="line">	UNICODE_STRING usStr1 = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">	WCHAR * szHello = <span class="string">L"Hello WCHAR"</span>;</span><br><span class="line">	RtlInitUnicodeString(&amp;usStr1, szHello);</span><br><span class="line">	KdPrint((<span class="string">"%wS"</span>, usStr1.Buffer));</span><br><span class="line">	<span class="comment">//1.2直接使用字符串初始化</span></span><br><span class="line">	DECLARE_CONST_UNICODE_STRING(usTest, <span class="string">L"Hello Test"</span>);</span><br><span class="line">	KdPrint((<span class="string">"%wS"</span>, usTest.Buffer));</span><br><span class="line"></span><br><span class="line">	<span class="comment">//2.栈空间初始化</span></span><br><span class="line">	<span class="comment">//2.1 定义一个字符串结构体</span></span><br><span class="line">	UNICODE_STRING usTest2 = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">	<span class="comment">//2.2 在栈上定义一个WCHAR类型的字符串</span></span><br><span class="line">	WCHAR szHello2[<span class="number">512</span>] = <span class="string">L"Hello 512"</span>;</span><br><span class="line">	<span class="comment">//2.3 把WCHAR类型的字符串指向结构体</span></span><br><span class="line">	usTest2.Buffer = szHello2;</span><br><span class="line">	<span class="comment">//2.4 设置字符串 的实际长度</span></span><br><span class="line">	usTest2.Length = wcslen(<span class="string">L"Hello 512"</span>) * <span class="keyword">sizeof</span>(WCHAR);</span><br><span class="line">	<span class="comment">//2.5 设置最大长度</span></span><br><span class="line">	usTest2.MaximumLength = <span class="keyword">sizeof</span>(szHello2);</span><br><span class="line">	KdPrint((<span class="string">"%wS"</span>, usTest2.Buffer));</span><br><span class="line">	<span class="comment">//返回成功状态</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">//3.堆空间初始化</span></span><br><span class="line">	<span class="comment">//3.1 定义一个字符串结构题</span></span><br><span class="line">	UNICODE_STRING usTest3 = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">	<span class="comment">//3.2 设置字符串长度</span></span><br><span class="line">	ULONG ulLength = ((wcslen(<span class="string">L"Hello 1024"</span>))) * <span class="keyword">sizeof</span>(WCHAR);</span><br><span class="line">	<span class="comment">//3.3 在分页内存池里申请一块内存</span></span><br><span class="line">	usTest3.Buffer = ExAllocatePoolWithTag(PagedPool, 256 * sizeof(WCHAR), 'POCU');</span><br><span class="line">	<span class="comment">//3.4 内存初始化,跟memset一样</span></span><br><span class="line">	RtlZeroMemory(usTest3.Buffer, <span class="number">256</span> * <span class="keyword">sizeof</span>(WCHAR));</span><br><span class="line">	<span class="comment">//3.5 拷贝字符串、</span></span><br><span class="line">	<span class="built_in">memcpy</span>(usTest3.Buffer, <span class="string">L"Hello 1024"</span>, ulLength);</span><br><span class="line">	<span class="comment">//3.6 设置字符串长度</span></span><br><span class="line">	usTest3.Length = ulLength;</span><br><span class="line">	<span class="comment">//3.7 设置字符串最大长度</span></span><br><span class="line">	usTest3.MaximumLength = <span class="number">256</span> * <span class="keyword">sizeof</span>(WCHAR);</span><br><span class="line">	<span class="comment">//3.8 打印处理，验证一下</span></span><br><span class="line">	KdPrint((<span class="string">"%wS"</span>, usTest3.Buffer));</span><br><span class="line">	<span class="comment">//3.9 释放</span></span><br><span class="line">	ExFreePool(usTest3.Buffer);</span><br><span class="line"></span><br><span class="line">	<span class="comment">//拷贝一个字符串</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">//1.定义一个目标字符串</span></span><br><span class="line">	UNICODE_STRING	dst = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">	<span class="comment">//2.定义一个WCHAR类型的变量</span></span><br><span class="line">	WCHAR dst_buf[<span class="number">256</span>];</span><br><span class="line">	<span class="comment">//3.初始化目标字符串，然后使用RtlInitEmptyUnicodeString而不是RtlInitUnicodeString</span></span><br><span class="line">	RtlInitEmptyUnicodeString(&amp;dst, &amp;dst_buf, <span class="number">256</span> * <span class="keyword">sizeof</span>(WCHAR));</span><br><span class="line">	<span class="comment">//4.定义源字符串</span></span><br><span class="line">	UNICODE_STRING src = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">	<span class="comment">//5.初始化源字符串</span></span><br><span class="line">	RtlInitUnicodeString(&amp;src, <span class="string">L"Hello SRC!"</span>);</span><br><span class="line">	<span class="comment">//6.拷贝</span></span><br><span class="line">	RtlCopyUnicodeString(&amp;dst, &amp;src);</span><br><span class="line">	<span class="comment">//7.打印，是否成功</span></span><br><span class="line">	KdPrint((<span class="string">"%wS"</span>, dst.Buffer));</span><br><span class="line">	<span class="comment">//返回一个成功的状态</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">//1. 定义一个字符串</span></span><br><span class="line">	UNICODE_STRING dst2 = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">	<span class="comment">//2. 定义一个WCHAR类型的变量，用于预分配</span></span><br><span class="line">	WCHAR dst2_buf[<span class="number">256</span>];</span><br><span class="line">	<span class="comment">//3. 定义源字符串1</span></span><br><span class="line">	UNICODE_STRING src1 = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">	<span class="comment">//4. 定义源字符串2</span></span><br><span class="line">	UNICODE_STRING src2 = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">	<span class="comment">//5. 把目的字符串初始化为一个空字符串</span></span><br><span class="line">	RtlInitEmptyUnicodeString(&amp;dst2, &amp;dst2_buf, <span class="number">256</span> * <span class="keyword">sizeof</span>(WCHAR));</span><br><span class="line">	<span class="comment">//6. 把两个源字符串初始hua</span></span><br><span class="line">	RtlInitUnicodeString(&amp;src1, <span class="string">L"Hello "</span>);</span><br><span class="line">	RtlInitUnicodeString(&amp;src2, <span class="string">L"woood"</span>);</span><br><span class="line">	<span class="comment">//7. 把源字符串1拷贝到目标字符串中， 使得目标字符串有值</span></span><br><span class="line">	RtlCopyUnicodeString(&amp;dst2, &amp;src1);</span><br><span class="line">	<span class="comment">//8. 进行字符串拼接, 把源字符串</span></span><br><span class="line">	RtlAppendUnicodeStringToString(&amp;dst2, &amp;src2);</span><br><span class="line">	<span class="comment">//9. 显示</span></span><br><span class="line">	KdPrint((<span class="string">"%wS"</span>, dst2.Buffer));</span><br><span class="line">	<span class="keyword">return</span> STATUS_SUCCESS;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="0x4-修改项目属性"><a href="#0x4-修改项目属性" class="headerlink" title="0x4 修改项目属性"></a>0x4 修改项目属性</h2><ol>
+<li><p>警告等级：<br><img src="/year/02/02/ck64zr5zz00202du53u7n0t2x/3.jpg" alt><br>将警告等级改为3；将警告视为错误改为否；</p>
+</li>
+<li><p>修改目标平台属性；<br>这个属性决定你生成的程序在什么平台上运行；<br>此处我的测试机器是win7 32位。<br><img src="/year/02/02/ck64zr5zz00202du53u7n0t2x/4.png" alt></p>
+</li>
+</ol>
+<h2 id="0x5-在目标机器上运行"><a href="#0x5-在目标机器上运行" class="headerlink" title="0x5 在目标机器上运行"></a>0x5 在目标机器上运行</h2><ol>
+<li><p>安装必备的软件<br>将生成的.sys文件拷贝到目标机器；<br>下载一个InstDrv.exe，用来加载驱动程序；<br>下载一个Dbgview.exe，用来显示驱动的log；<br>两个程序都放在测试的机器里。</p>
+</li>
+<li><p>用admin权限打开InstDrv和Dbgview，进行监听。</p>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+      <div>
+        
+      </div>
+
+    
+
+    
+
+    
+
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/30/ck64zr60200272du513d8oj6x/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wood">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="木头的小木屋">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/year/01/30/ck64zr60200272du513d8oj6x/" itemprop="url">Tcache Attack 总结</a></h1>
         
 
         <div class="post-meta">
@@ -392,7 +568,7 @@
           <h2 id="0x00"><a href="#0x00" class="headerlink" title="0x00"></a>0x00</h2><p>好像这个新版本的tcache安全性更差了，也不知道为啥这样改</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/01/30/ck624jc2o00285iu5dvduloex/#more" rel="contents">
+            <a class="btn" href="/year/01/30/ck64zr60200272du513d8oj6x/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -448,7 +624,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/30/ck624jc1y000w5iu5skd1bhig/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/30/ck64zr5ze000j2du5m5w3katd/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -467,7 +643,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/01/30/ck624jc1y000w5iu5skd1bhig/" itemprop="url">docker 初探</a></h1>
+                <a class="post-title-link" href="/year/01/30/ck64zr5ze000j2du5m5w3katd/" itemprop="url">docker 初探</a></h1>
         
 
         <div class="post-meta">
@@ -543,7 +719,7 @@
           <h2 id="0x0-Docker是什么"><a href="#0x0-Docker是什么" class="headerlink" title="0x0 Docker是什么"></a>0x0 Docker是什么</h2><p>Docker 属于 Linux 容器的一种封装，提供简单易用的容器使用接口。它是目前最流行的 Linux 容器解决方案。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/01/30/ck624jc1y000w5iu5skd1bhig/#more" rel="contents">
+            <a class="btn" href="/year/01/30/ck64zr5ze000j2du5m5w3katd/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -599,7 +775,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/24/ck624jc9i002p5iu58j93odxj/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/24/ck64zr65q002t2du54ql002p7/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -618,7 +794,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/01/24/ck624jc9i002p5iu58j93odxj/" itemprop="url">pwnable-tw applestore</a></h1>
+                <a class="post-title-link" href="/year/01/24/ck64zr65q002t2du54ql002p7/" itemprop="url">pwnable-tw applestore</a></h1>
         
 
         <div class="post-meta">
@@ -694,7 +870,7 @@
           <h2 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h2><p>这道题我一开始一直以为是堆，然后也一直没找到堆溢出的漏洞，最后看了题解才知道原来是个栈，利用方式以前其实也做过，还是不能思维定式了。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/01/24/ck624jc9i002p5iu58j93odxj/#more" rel="contents">
+            <a class="btn" href="/year/01/24/ck64zr65q002t2du54ql002p7/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -750,7 +926,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/22/ck624jc1q000g5iu5qtaz02qh/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/22/ck64zr5ze000k2du5if0br9ur/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -769,7 +945,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/01/22/ck624jc1q000g5iu5qtaz02qh/" itemprop="url">CSAPP Datalab</a></h1>
+                <a class="post-title-link" href="/year/01/22/ck64zr5ze000k2du5if0br9ur/" itemprop="url">CSAPP Datalab</a></h1>
         
 
         <div class="post-meta">
@@ -845,7 +1021,7 @@
           <p>CSAPP大概都过了一遍，但是很多东西不实践一下理解还是不到位，趁这个假期尽量把11个lab做一下。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/01/22/ck624jc1q000g5iu5qtaz02qh/#more" rel="contents">
+            <a class="btn" href="/year/01/22/ck64zr5ze000k2du5if0br9ur/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -901,7 +1077,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/21/ck624jc9j002q5iu5gjt5835e/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/21/ck64zr65q002s2du54doyepau/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -920,7 +1096,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/01/21/ck624jc9j002q5iu5gjt5835e/" itemprop="url">pwnable tw silver-bullet</a></h1>
+                <a class="post-title-link" href="/year/01/21/ck64zr65q002s2du54doyepau/" itemprop="url">pwnable tw silver-bullet</a></h1>
         
 
         <div class="post-meta">
@@ -974,7 +1150,7 @@
           <h2 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h2><p>一道32位rop题，里面有个<code>off-by-one</code>的细节，这次没有注意，下次一定好好看</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/01/21/ck624jc9j002q5iu5gjt5835e/#more" rel="contents">
+            <a class="btn" href="/year/01/21/ck64zr65q002s2du54doyepau/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1030,7 +1206,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/20/ck624jc1s000l5iu54hp4neb6/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/20/ck64zr60100252du55rttl6gs/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -1049,7 +1225,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/01/20/ck624jc1s000l5iu54hp4neb6/" itemprop="url">pwnable-tw-Hacknote</a></h1>
+                <a class="post-title-link" href="/year/01/20/ck64zr60100252du55rttl6gs/" itemprop="url">pwnable-tw-Hacknote</a></h1>
         
 
         <div class="post-meta">
@@ -1125,7 +1301,7 @@
           <h2 id="0x00-简介"><a href="#0x00-简介" class="headerlink" title="0x00 简介"></a>0x00 简介</h2><p>一道<code>uaf</code>和<code>double free</code>题目，跟以前做的套路不太一样。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/01/20/ck624jc1s000l5iu54hp4neb6/#more" rel="contents">
+            <a class="btn" href="/year/01/20/ck64zr60100252du55rttl6gs/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1181,7 +1357,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/19/ck624jc2l00225iu5dbdgpx0s/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/19/ck64zr60000222du5mclx3inz/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -1200,7 +1376,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/01/19/ck624jc2l00225iu5dbdgpx0s/" itemprop="url">pwnable.tw dubble sort题解</a></h1>
+                <a class="post-title-link" href="/year/01/19/ck64zr60000222du5mclx3inz/" itemprop="url">pwnable.tw dubble sort题解</a></h1>
         
 
         <div class="post-meta">
@@ -1276,7 +1452,7 @@
           <h2 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h2><p>一道基础的栈溢出，开启了pie和canary</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/01/19/ck624jc2l00225iu5dbdgpx0s/#more" rel="contents">
+            <a class="btn" href="/year/01/19/ck64zr60000222du5mclx3inz/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1332,7 +1508,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/18/ck624jc2j001z5iu5spqyw94v/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/18/ck64zr5zk000z2du5y2tfc36k/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -1351,7 +1527,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/01/18/ck624jc2j001z5iu5spqyw94v/" itemprop="url">gdb的调试与使用</a></h1>
+                <a class="post-title-link" href="/year/01/18/ck64zr5zk000z2du5y2tfc36k/" itemprop="url">gdb的调试与使用</a></h1>
         
 
         <div class="post-meta">
@@ -1428,7 +1604,7 @@
 <p><a href="https://github.com/scwuaptx/Pwngdb" target="_blank" rel="noopener">gdb-peda</a></p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/01/18/ck624jc2j001z5iu5spqyw94v/#more" rel="contents">
+            <a class="btn" href="/year/01/18/ck64zr5zk000z2du5y2tfc36k/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1484,7 +1660,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/02/ck624jc1n000c5iu5d6j0yb2w/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/02/ck64zr5z7000b2du5zcta8rp5/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -1503,7 +1679,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/01/02/ck624jc1n000c5iu5d6j0yb2w/" itemprop="url">pwnable-tw-3x17</a></h1>
+                <a class="post-title-link" href="/year/01/02/ck64zr5z7000b2du5zcta8rp5/" itemprop="url">pwnable-tw-3x17</a></h1>
         
 
         <div class="post-meta">
@@ -1557,159 +1733,7 @@
           <p>停课复习了，闲暇时可以刷刷pwn，writeup参考<a href="https://xuanxuanblingbling.github.io/ctf/pwn/2019/09/06/317/" target="_blank" rel="noopener">和媳妇一起学Pwn 之 3x17</a></p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/01/02/ck624jc1n000c5iu5d6j0yb2w/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-      <div>
-        
-      </div>
-
-    
-
-    
-
-    
-
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/11/13/ck624jc29001i5iu547j0h8ku/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Wood">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="木头的小木屋">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/year/11/13/ck624jc29001i5iu547j0h8ku/" itemprop="url">湖湘杯复赛题目-writeup</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-13T12:59:11+08:00">
-                2019-11-13
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/writeup/" itemprop="url" rel="index">
-                    <span itemprop="name">writeup</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>还是要多刷多复现堆题啊</p>
-<h2 id="0x01-HackNodte"><a href="#0x01-HackNodte" class="headerlink" title="0x01 HackNodte"></a>0x01 HackNodte</h2><h3 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h3><p>这道题是静态链接，修改时用的是<code>strlen</code>,造成了<code>off-by-one</code>，所以堆重叠。然后把<code>chunk</code>分配到<code>main_arena</code>上，再修改<code>unsortedbin</code>,分配到<code>malloc_hook</code>上</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/year/11/13/ck624jc29001i5iu547j0h8ku/#more" rel="contents">
+            <a class="btn" href="/year/01/02/ck64zr5z7000b2du5zcta8rp5/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1806,7 +1830,7 @@
               
                 <a href="/archives">
               
-                  <span class="site-state-item-count">33</span>
+                  <span class="site-state-item-count">34</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1828,7 +1852,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-count">12</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
