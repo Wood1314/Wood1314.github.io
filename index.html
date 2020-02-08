@@ -297,7 +297,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/02/08/ck6d96atr000739u585yqnfub/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/02/08/ck6d9olbl002n4su529gu5nl3/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -316,7 +316,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/02/08/ck6d96atr000739u585yqnfub/" itemprop="url">IO_file 总结</a></h1>
+                <a class="post-title-link" href="/year/02/08/ck6d9olbl002n4su529gu5nl3/" itemprop="url">IO_file 总结</a></h1>
         
 
         <div class="post-meta">
@@ -391,6 +391,7 @@
         
           
             <h2 id="0x0-简介"><a href="#0x0-简介" class="headerlink" title="0x0 简介"></a>0x0 简介</h2><p>熟悉一下IO_file</p>
+<!--mote-->
 <h2 id="0x1-File-结构描述"><a href="#0x1-File-结构描述" class="headerlink" title="0x1 File 结构描述"></a>0x1 File 结构描述</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* The tag name of this struct is _IO_FILE to preserve historic</span></span><br><span class="line"><span class="comment">   C++ mangled names for functions taking FILE* arguments.</span></span><br><span class="line"><span class="comment">   That name should not be used in new code.  */</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> _<span class="title">IO_FILE</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">  <span class="keyword">int</span> _flags;                <span class="comment">/* High-order word is _IO_MAGIC; rest is flags. */</span></span><br><span class="line">  <span class="comment">/* The following pointers correspond to the C++ streambuf protocol. */</span></span><br><span class="line">  <span class="keyword">char</span> *_IO_read_ptr;        <span class="comment">/* Current read pointer */</span></span><br><span class="line">  <span class="keyword">char</span> *_IO_read_end;        <span class="comment">/* End of get area. */</span></span><br><span class="line">  <span class="keyword">char</span> *_IO_read_base;        <span class="comment">/* Start of putback+get area. */</span></span><br><span class="line">  <span class="keyword">char</span> *_IO_write_base;        <span class="comment">/* Start of put area. */</span></span><br><span class="line">  <span class="keyword">char</span> *_IO_write_ptr;        <span class="comment">/* Current put pointer. */</span></span><br><span class="line">  <span class="keyword">char</span> *_IO_write_end;        <span class="comment">/* End of put area. */</span></span><br><span class="line">  <span class="keyword">char</span> *_IO_buf_base;        <span class="comment">/* Start of reserve area. */</span></span><br><span class="line">  <span class="keyword">char</span> *_IO_buf_end;        <span class="comment">/* End of reserve area. */</span></span><br><span class="line">  <span class="comment">/* The following fields are used to support backing up and undo. */</span></span><br><span class="line">  <span class="keyword">char</span> *_IO_save_base; <span class="comment">/* Pointer to start of non-current get area. */</span></span><br><span class="line">  <span class="keyword">char</span> *_IO_backup_base;  <span class="comment">/* Pointer to first valid character of backup area */</span></span><br><span class="line">  <span class="keyword">char</span> *_IO_save_end; <span class="comment">/* Pointer to end of non-current get area. */</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> _<span class="title">IO_marker</span> *_<span class="title">markers</span>;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> _<span class="title">IO_FILE</span> *_<span class="title">chain</span>;</span></span><br><span class="line">  <span class="keyword">int</span> _fileno;</span><br><span class="line">  <span class="keyword">int</span> _flags2;</span><br><span class="line">  <span class="keyword">__off_t</span> _old_offset; <span class="comment">/* This used to be _offset but it's too small.  */</span></span><br><span class="line">  <span class="comment">/* 1+column number of pbase(); 0 is unknown. */</span></span><br><span class="line">  <span class="keyword">unsigned</span> <span class="keyword">short</span> _cur_column;</span><br><span class="line">  <span class="keyword">signed</span> <span class="keyword">char</span> _vtable_offset;</span><br><span class="line">  <span class="keyword">char</span> _shortbuf[<span class="number">1</span>];</span><br><span class="line">  _IO_lock_t *_lock;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> _IO_USE_OLD_IO_FILE</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
 <p>进程中的 FILE 结构会通过_chain 域彼此连接形成一个链表，链表头部用全局变量_IO_list_all 表示，通过这个值我们可以遍历所有的 FILE 结构。</p>
@@ -475,7 +476,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/02/02/ck6d96aus002b39u5j1ymqcj2/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/02/02/ck6d9olbi002d4su5t58bucgg/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -494,7 +495,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/02/02/ck6d96aus002b39u5j1ymqcj2/" itemprop="url">驱动开发初探</a></h1>
+                <a class="post-title-link" href="/year/02/02/ck6d9olbi002d4su5t58bucgg/" itemprop="url">驱动开发初探</a></h1>
         
 
         <div class="post-meta">
@@ -570,7 +571,7 @@
           <h2 id="0x0-前言"><a href="#0x0-前言" class="headerlink" title="0x0 前言"></a>0x0 前言</h2><p>驱动开发的环境配置，以及入门的hello_world<br>参考链接: <a href="https://qwertwwwe.github.io/windows-driver-develop-setup-environment/" target="_blank" rel="noopener">https://qwertwwwe.github.io/windows-driver-develop-setup-environment/</a></p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/02/02/ck6d96aus002b39u5j1ymqcj2/#more" rel="contents">
+            <a class="btn" href="/year/02/02/ck6d9olbi002d4su5t58bucgg/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -626,7 +627,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/30/ck6d96ayo002y39u5v4f0p878/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/30/ck6d9olaa00084su5n0duhess/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -645,7 +646,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/01/30/ck6d96ayo002y39u5v4f0p878/" itemprop="url">Tcache Attack 总结</a></h1>
+                <a class="post-title-link" href="/year/01/30/ck6d9olaa00084su5n0duhess/" itemprop="url">Tcache Attack 总结</a></h1>
         
 
         <div class="post-meta">
@@ -721,7 +722,7 @@
           <h2 id="0x00"><a href="#0x00" class="headerlink" title="0x00"></a>0x00</h2><p>好像这个新版本的tcache安全性更差了，也不知道为啥这样改</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/01/30/ck6d96ayo002y39u5v4f0p878/#more" rel="contents">
+            <a class="btn" href="/year/01/30/ck6d9olaa00084su5n0duhess/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -777,7 +778,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/30/ck6d96axe002t39u54t6lhwpv/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/30/ck6d9ola900064su51263nlf6/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -796,7 +797,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/01/30/ck6d96axe002t39u54t6lhwpv/" itemprop="url">docker 初探</a></h1>
+                <a class="post-title-link" href="/year/01/30/ck6d9ola900064su51263nlf6/" itemprop="url">docker 初探</a></h1>
         
 
         <div class="post-meta">
@@ -872,7 +873,7 @@
           <h2 id="0x0-Docker是什么"><a href="#0x0-Docker是什么" class="headerlink" title="0x0 Docker是什么"></a>0x0 Docker是什么</h2><p>Docker 属于 Linux 容器的一种封装，提供简单易用的容器使用接口。它是目前最流行的 Linux 容器解决方案。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/01/30/ck6d96axe002t39u54t6lhwpv/#more" rel="contents">
+            <a class="btn" href="/year/01/30/ck6d9ola900064su51263nlf6/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -928,7 +929,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/24/ck6d96au8000s39u56l8o2fu2/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/24/ck6d9olb400174su51959joib/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -947,7 +948,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/01/24/ck6d96au8000s39u56l8o2fu2/" itemprop="url">pwnable-tw applestore</a></h1>
+                <a class="post-title-link" href="/year/01/24/ck6d9olb400174su51959joib/" itemprop="url">pwnable-tw applestore</a></h1>
         
 
         <div class="post-meta">
@@ -1023,7 +1024,7 @@
           <h2 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h2><p>这道题我一开始一直以为是堆，然后也一直没找到堆溢出的漏洞，最后看了题解才知道原来是个栈，利用方式以前其实也做过，还是不能思维定式了。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/01/24/ck6d96au8000s39u56l8o2fu2/#more" rel="contents">
+            <a class="btn" href="/year/01/24/ck6d9olb400174su51959joib/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1079,7 +1080,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/22/ck6d96aut002e39u5hwcznokm/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/22/ck6d9ol9w00004su52td4y1gx/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -1098,7 +1099,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/01/22/ck6d96aut002e39u5hwcznokm/" itemprop="url">CSAPP Datalab</a></h1>
+                <a class="post-title-link" href="/year/01/22/ck6d9ol9w00004su52td4y1gx/" itemprop="url">CSAPP Datalab</a></h1>
         
 
         <div class="post-meta">
@@ -1174,7 +1175,7 @@
           <p>CSAPP大概都过了一遍，但是很多东西不实践一下理解还是不到位，趁这个假期尽量把11个lab做一下。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/01/22/ck6d96aut002e39u5hwcznokm/#more" rel="contents">
+            <a class="btn" href="/year/01/22/ck6d9ol9w00004su52td4y1gx/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1230,7 +1231,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/21/ck6d96ayn002x39u5rewan9gl/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/21/ck6d9olb000114su5xmr8uwv3/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -1249,7 +1250,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/01/21/ck6d96ayn002x39u5rewan9gl/" itemprop="url">pwnable tw silver-bullet</a></h1>
+                <a class="post-title-link" href="/year/01/21/ck6d9olb000114su5xmr8uwv3/" itemprop="url">pwnable tw silver-bullet</a></h1>
         
 
         <div class="post-meta">
@@ -1303,7 +1304,7 @@
           <h2 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h2><p>一道32位rop题，里面有个<code>off-by-one</code>的细节，这次没有注意，下次一定好好看</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/01/21/ck6d96ayn002x39u5rewan9gl/#more" rel="contents">
+            <a class="btn" href="/year/01/21/ck6d9olb000114su5xmr8uwv3/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1359,7 +1360,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/20/ck6d96au4000q39u5c2u8dlnp/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/20/ck6d9olam000p4su550dmeny1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -1378,7 +1379,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/01/20/ck6d96au4000q39u5c2u8dlnp/" itemprop="url">pwnable-tw-Hacknote</a></h1>
+                <a class="post-title-link" href="/year/01/20/ck6d9olam000p4su550dmeny1/" itemprop="url">pwnable-tw-Hacknote</a></h1>
         
 
         <div class="post-meta">
@@ -1454,7 +1455,7 @@
           <h2 id="0x00-简介"><a href="#0x00-简介" class="headerlink" title="0x00 简介"></a>0x00 简介</h2><p>一道<code>uaf</code>和<code>double free</code>题目，跟以前做的套路不太一样。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/01/20/ck6d96au4000q39u5c2u8dlnp/#more" rel="contents">
+            <a class="btn" href="/year/01/20/ck6d9olam000p4su550dmeny1/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1510,7 +1511,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/19/ck6d96aur002939u5y2x8rx1h/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/19/ck6d9olar000v4su5dbkpltya/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -1529,7 +1530,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/01/19/ck6d96aur002939u5y2x8rx1h/" itemprop="url">pwnable.tw dubble sort题解</a></h1>
+                <a class="post-title-link" href="/year/01/19/ck6d9olar000v4su5dbkpltya/" itemprop="url">pwnable.tw dubble sort题解</a></h1>
         
 
         <div class="post-meta">
@@ -1605,7 +1606,7 @@
           <h2 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h2><p>一道基础的栈溢出，开启了pie和canary</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/01/19/ck6d96aur002939u5y2x8rx1h/#more" rel="contents">
+            <a class="btn" href="/year/01/19/ck6d9olar000v4su5dbkpltya/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1661,7 +1662,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/18/ck6d96au0000l39u5rxt59837/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/18/ck6d9olae000e4su5waceeatm/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -1680,7 +1681,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/01/18/ck6d96au0000l39u5rxt59837/" itemprop="url">gdb的调试与使用</a></h1>
+                <a class="post-title-link" href="/year/01/18/ck6d9olae000e4su5waceeatm/" itemprop="url">gdb的调试与使用</a></h1>
         
 
         <div class="post-meta">
@@ -1757,7 +1758,7 @@
 <p><a href="https://github.com/scwuaptx/Pwngdb" target="_blank" rel="noopener">gdb-peda</a></p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/01/18/ck6d96au0000l39u5rxt59837/#more" rel="contents">
+            <a class="btn" href="/year/01/18/ck6d9olae000e4su5waceeatm/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
