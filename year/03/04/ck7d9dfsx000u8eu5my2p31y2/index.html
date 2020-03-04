@@ -81,18 +81,18 @@
 
 
 
-<meta name="description" content="0x0简介libc2.29的题目又与2.27的机制有所不同这里总结下 0x1 新增机制tcache是glibc-2.26引入的一种新技术，目的是提升堆管理的性能，早期的libc对tcache基本没任何防护，简直到了为所欲为的地步，一不检查double free，二不检查size大小，使用起来比fastbins还要简单。 查看glibc-2.29 malloc.c的源码，tcache_entry结构">
+<meta name="description" content="0x0简介libc2.29的题目又与2.27的机制有所不同这里总结下">
 <meta name="keywords" content="tcache,double">
 <meta property="og:type" content="article">
 <meta property="og:title" content="libc2.29利用小结">
 <meta property="og:url" content="wood1314.github.io/year/03/04/ck7d9dfsx000u8eu5my2p31y2/index.html">
 <meta property="og:site_name" content="木头的小木屋">
-<meta property="og:description" content="0x0简介libc2.29的题目又与2.27的机制有所不同这里总结下 0x1 新增机制tcache是glibc-2.26引入的一种新技术，目的是提升堆管理的性能，早期的libc对tcache基本没任何防护，简直到了为所欲为的地步，一不检查double free，二不检查size大小，使用起来比fastbins还要简单。 查看glibc-2.29 malloc.c的源码，tcache_entry结构">
+<meta property="og:description" content="0x0简介libc2.29的题目又与2.27的机制有所不同这里总结下">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2020-03-04T11:49:03.914Z">
+<meta property="og:updated_time" content="2020-03-04T11:50:53.171Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="libc2.29利用小结">
-<meta name="twitter:description" content="0x0简介libc2.29的题目又与2.27的机制有所不同这里总结下 0x1 新增机制tcache是glibc-2.26引入的一种新技术，目的是提升堆管理的性能，早期的libc对tcache基本没任何防护，简直到了为所欲为的地步，一不检查double free，二不检查size大小，使用起来比fastbins还要简单。 查看glibc-2.29 malloc.c的源码，tcache_entry结构">
+<meta name="twitter:description" content="0x0简介libc2.29的题目又与2.27的机制有所不同这里总结下">
 
 
 
@@ -392,6 +392,7 @@
 
       
         <h2 id="0x0简介"><a href="#0x0简介" class="headerlink" title="0x0简介"></a>0x0简介</h2><p>libc2.29的题目又与2.27的机制有所不同这里总结下</p>
+<a id="more"></a>
 <h2 id="0x1-新增机制"><a href="#0x1-新增机制" class="headerlink" title="0x1 新增机制"></a>0x1 新增机制</h2><p>tcache是glibc-2.26引入的一种新技术，目的是提升堆管理的性能，早期的libc对tcache基本没任何防护，简直到了为所欲为的地步，一不检查double free，二不检查size大小，使用起来比fastbins还要简单。</p>
 <p>查看glibc-2.29 malloc.c的源码，tcache_entry结构体增加了一个新指针key放在bk的位置，用于检测double free。</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">tcache_entry</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">tcache_entry</span> *<span class="title">next</span>;</span></span><br><span class="line">  <span class="comment">/* This field exists to detect double frees.  */</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">tcache_perthread_struct</span> *<span class="title">key</span>;</span> <span class="comment">/* 新增指针 */</span></span><br><span class="line">&#125; tcache_entry;</span><br></pre></td></tr></table></figure>
