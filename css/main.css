@@ -1938,7 +1938,7 @@ img:hover {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #fe54eb;
+  background: #73aa13;
 }
 .links-of-blogroll {
   font-size: 13px;
@@ -3421,7 +3421,7 @@ a {
   opacity: 0.9;
 }
 body {
-  background: url("/images/d.jpg");
+  background: url("/images/e.jpg");
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-position: 50% 50%;
