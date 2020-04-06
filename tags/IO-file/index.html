@@ -311,7 +311,7 @@
 
       <h2 class="post-title">
         
-            <a class="post-title-link" href="/year/02/08/ck88u4do800141eu5rq2w1c43/" itemprop="url">
+            <a class="post-title-link" href="/year/02/08/ck8olpftr000z3du5f4haip0j/" itemprop="url">
               
                 <span itemprop="name">IO_file 总结</span>
               
@@ -385,7 +385,7 @@
               
                 <a href="/archives">
               
-                  <span class="site-state-item-count">44</span>
+                  <span class="site-state-item-count">45</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -407,7 +407,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">21</span>
+                  <span class="site-state-item-count">22</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -1071,7 +1071,29 @@
   + <script data-no-instant>InstantClick.init();</script>
 </body>
 </html>
--search-result');
+e {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
       } else {
         proceedsearch();
       };
