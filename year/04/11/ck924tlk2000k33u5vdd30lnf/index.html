@@ -81,18 +81,18 @@
 
 
 
-<meta name="description" content="0x00 前言largebin attack 以前就是稍微看过，没怎么做过题，这里总结下largebin的管理机制,然后做一两道题练手然后就开始深入内核pwn的学习了。感觉自己刷题还是不够，等以赛代练吧。 0x01 lagrgebin 管理机制large bins 中一共包括 63 个 bin，每个 bin 中的 chunk 的大小不一致，而是处于一定区间范围内。此外，这 63 个 bin 被分成">
+<meta name="description" content="0x00 前言largebin attack 以前就是稍微看过，没怎么做过题，这里总结下largebin的管理机制,然后做一两道题练手然后就开始深入内核pwn的学习了。感觉自己刷题还是不够，等以赛代练吧。">
 <meta name="keywords" content="largebin_attack,heap">
 <meta property="og:type" content="article">
 <meta property="og:title" content="largebin_attack">
 <meta property="og:url" content="wood1314.github.io/year/04/11/ck924tlk2000k33u5vdd30lnf/index.html">
 <meta property="og:site_name" content="木头的小木屋">
-<meta property="og:description" content="0x00 前言largebin attack 以前就是稍微看过，没怎么做过题，这里总结下largebin的管理机制,然后做一两道题练手然后就开始深入内核pwn的学习了。感觉自己刷题还是不够，等以赛代练吧。 0x01 lagrgebin 管理机制large bins 中一共包括 63 个 bin，每个 bin 中的 chunk 的大小不一致，而是处于一定区间范围内。此外，这 63 个 bin 被分成">
+<meta property="og:description" content="0x00 前言largebin attack 以前就是稍微看过，没怎么做过题，这里总结下largebin的管理机制,然后做一两道题练手然后就开始深入内核pwn的学习了。感觉自己刷题还是不够，等以赛代练吧。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2020-04-11T12:06:20.329Z">
+<meta property="og:updated_time" content="2020-04-16T07:24:54.840Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="largebin_attack">
-<meta name="twitter:description" content="0x00 前言largebin attack 以前就是稍微看过，没怎么做过题，这里总结下largebin的管理机制,然后做一两道题练手然后就开始深入内核pwn的学习了。感觉自己刷题还是不够，等以赛代练吧。 0x01 lagrgebin 管理机制large bins 中一共包括 63 个 bin，每个 bin 中的 chunk 的大小不一致，而是处于一定区间范围内。此外，这 63 个 bin 被分成">
+<meta name="twitter:description" content="0x00 前言largebin attack 以前就是稍微看过，没怎么做过题，这里总结下largebin的管理机制,然后做一两道题练手然后就开始深入内核pwn的学习了。感觉自己刷题还是不够，等以赛代练吧。">
 
 
 
@@ -402,6 +402,8 @@
 
       
         <h2 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h2><p>largebin attack 以前就是稍微看过，没怎么做过题，这里总结下largebin的管理机制,然后做一两道题练手然后就开始深入内核pwn的学习了。感觉自己刷题还是不够，等以赛代练吧。</p>
+<a id="more"></a>
+
 <h2 id="0x01-lagrgebin-管理机制"><a href="#0x01-lagrgebin-管理机制" class="headerlink" title="0x01 lagrgebin 管理机制"></a>0x01 lagrgebin 管理机制</h2><p>large bins 中一共包括 63 个 bin，每个 bin 中的 chunk 的大小不一致，而是处于一定区间范围内。此外，这 63 个 bin 被分成了 6 组，每组 bin 中的 chunk 大小之间的公差一致，具体如下：</p>
 <table>
 <thead>
