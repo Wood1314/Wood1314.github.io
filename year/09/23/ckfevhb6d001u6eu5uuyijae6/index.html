@@ -116,7 +116,7 @@
 <meta property="og:site_name" content="木头的小木屋">
 <meta property="og:description" content="记录下mips架构环境的搭建和利用">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2020-09-23T04:13:30.953Z">
+<meta property="og:updated_time" content="2020-09-23T10:44:58.358Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="mips pwn">
 <meta name="twitter:description" content="记录下mips架构环境的搭建和利用">
@@ -443,9 +443,9 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mkdir lib </span><br><span class="line">sudo mv libc.so.1 ./lib/</span><br><span class="line">sudo mv ld-uClibc.so.0 ./lib/</span><br></pre></td></tr></table></figure>
 
 <p>启动虚拟机</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-mipsel -L ./lib ./main</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-mipsel -L ./ ./main</span><br></pre></td></tr></table></figure>
 
-<h3 id="调试"><a href="#调试" class="headerlink" title="调试"></a>调试</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-mipsel -L ./lib ./main</span><br></pre></td></tr></table></figure>
+<h3 id="调试"><a href="#调试" class="headerlink" title="调试"></a>调试</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-mipsel -L ./ ./main</span><br></pre></td></tr></table></figure>
 
 <p>然后另开一个终端(用pwndbg调试起来比较友好)</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gdb-multiarch ./main</span><br><span class="line">gdb&gt; target remote localhost:1234</span><br></pre></td></tr></table></figure>
