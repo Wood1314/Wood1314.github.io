@@ -116,7 +116,7 @@
 <meta property="og:site_name" content="木头的小木屋">
 <meta property="og:description" content="记录下mips架构环境的搭建和利用">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2020-09-23T10:44:58.358Z">
+<meta property="og:updated_time" content="2020-10-23T00:28:10.860Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="mips pwn">
 <meta name="twitter:description" content="记录下mips架构环境的搭建和利用">
@@ -431,13 +431,26 @@
         <p>记录下mips架构环境的搭建和利用</p>
 <a id="more"></a>
 
-<h2 id="mips基本知识"><a href="#mips基本知识" class="headerlink" title="mips基本知识"></a>mips基本知识</h2><ul>
+<h2 id="0x0-mips基本知识"><a href="#0x0-mips基本知识" class="headerlink" title="0x0 mips基本知识"></a>0x0 mips基本知识</h2><ul>
 <li><code>a0-a3</code>: 存储参数</li>
 <li><code>fp</code>: <code>fram pointer</code>，用来恢复栈之类的操作，可以理解为和<code>ebp</code>差不多的作用</li>
 <li><code>sp</code>: 存储栈地址</li>
 <li><code>v0...</code>: 存储一些变量或地址</li>
 <li><code>t8,t9</code>: 临时寄存器，<code>t9</code>常常用来调用函数。如<code>alarm</code>的<code>plt</code>调用如下</li>
 </ul>
+<h2 id="0x1-交叉编译环境"><a href="#0x1-交叉编译环境" class="headerlink" title="0x1 交叉编译环境"></a>0x1 交叉编译环境</h2><h3 id="大端"><a href="#大端" class="headerlink" title="大端"></a>大端</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install linux-libc-dev-mips-cross </span><br><span class="line">sudo apt-get install libc6-mips-cross libc6-dev-mips-cross </span><br><span class="line">sudo apt-get install binutils-mips-linux-gnu gcc-mips-linux-gnu </span><br><span class="line">sudo apt-get install g++-mips-linux-gnu</span><br></pre></td></tr></table></figure>
+
+<h3 id="小端"><a href="#小端" class="headerlink" title="小端"></a>小端</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install linux-libc-dev-mipsel-cross</span><br><span class="line">sudo apt-get install libc6-mipsel-cross libc6-dev-mipsel-cross</span><br><span class="line">sudo apt-get install binutils-mipsel-linux-gnu gcc-mipsel-linux-gnu</span><br><span class="line">sudo apt-get install g++-mipsel-linux-gnu</span><br></pre></td></tr></table></figure>
+
+<p>qemu有一个参数是是<code>-L</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-L path       QEMU_LD_PREFIX    set the elf interpreter prefix to &apos;path&apos;</span><br></pre></td></tr></table></figure>
+
+<p>通过这个我们可以指定lib所在的位置，进入<code>/usr</code>可以看到mips库所在的位置</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">wood@ubuntu:~/pwn/mips/magicheap$ ls /usr/</span><br><span class="line">bin  games  include  lib  libexec  <span class="built_in">local</span>  locale  mipsel-linux-gnu  mips-linux-gnu  sbin  share  src</span><br></pre></td></tr></table></figure>
+
+<p>假设我们手头有一个mips小端的程序，我们就可以通过以下参数启动它。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-mipsel -L /usr/mipsel-linux-gnu/ ./hello</span><br></pre></td></tr></table></figure>
+
 <h2 id="pwn02-babystack"><a href="#pwn02-babystack" class="headerlink" title="pwn02_babystack"></a>pwn02_babystack</h2><h3 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h3><p>这里采用qemu的用户模式来创建一个虚拟机执行程序。</p>
 <p>先把对应的libc库放置当前目录的一个lib文件夹中</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mkdir lib </span><br><span class="line">sudo mv libc.so.1 ./lib/</span><br><span class="line">sudo mv ld-uClibc.so.0 ./lib/</span><br></pre></td></tr></table></figure>
@@ -726,7 +739,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#mips基本知识"><span class="nav-number">1.</span> <span class="nav-text">mips基本知识</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#pwn02-babystack"><span class="nav-number">2.</span> <span class="nav-text">pwn02_babystack</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#准备工作"><span class="nav-number">2.1.</span> <span class="nav-text">准备工作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#调试"><span class="nav-number">2.2.</span> <span class="nav-text">调试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#题目分析"><span class="nav-number">2.3.</span> <span class="nav-text">题目分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#exp"><span class="nav-number">2.4.</span> <span class="nav-text">exp</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#0x0-mips基本知识"><span class="nav-number">1.</span> <span class="nav-text">0x0 mips基本知识</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x1-交叉编译环境"><span class="nav-number">2.</span> <span class="nav-text">0x1 交叉编译环境</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#大端"><span class="nav-number">2.1.</span> <span class="nav-text">大端</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#小端"><span class="nav-number">2.2.</span> <span class="nav-text">小端</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#pwn02-babystack"><span class="nav-number">3.</span> <span class="nav-text">pwn02_babystack</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#准备工作"><span class="nav-number">3.1.</span> <span class="nav-text">准备工作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#调试"><span class="nav-number">3.2.</span> <span class="nav-text">调试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#题目分析"><span class="nav-number">3.3.</span> <span class="nav-text">题目分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#exp"><span class="nav-number">3.4.</span> <span class="nav-text">exp</span></a></li></ol></li></ol></div>
             
 
           </div>
