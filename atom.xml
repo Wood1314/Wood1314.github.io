@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="wood1314.github.io/"/>
-  <updated>2020-11-12T06:21:06.100Z</updated>
+  <updated>2020-12-03T14:20:24.297Z</updated>
   <id>wood1314.github.io/</id>
   
   <author>
@@ -15,6 +15,28 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>v8-startctf2019-oob</title>
+    <link href="wood1314.github.io/year/11/12/cki8xfdtm00006nu58o8zsnox/"/>
+    <id>wood1314.github.io/year/11/12/cki8xfdtm00006nu58o8zsnox/</id>
+    <published>2020-11-12T06:24:00.000Z</published>
+    <updated>2020-12-03T14:20:24.297Z</updated>
+    
+    <content type="html"><![CDATA[<p>一道简单v8例题来看下v8的利用</p><a id="more"></a><h2 id="0x01-题目准备"><a href="#0x01-题目准备" class="headerlink" title="0x01 题目准备"></a>0x01 题目准备</h2><p>先恢复到指定版本</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git reset --hard 6dc88c191f5ecc5389dc26efa3ca0907faef3598</span><br></pre></td></tr></table></figure><p>编译</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">gclient sync</span><br><span class="line">git apply &lt; ../browser_pwn/Chrome/oob.diff</span><br><span class="line">tools/dev/v8gen.py x64.release</span><br></pre></td></tr></table></figure><p>修改文件</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim out.gn/x64.release/args.gn</span><br></pre></td></tr></table></figure><p>添加内容</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">v8_enable_backtrace = true</span><br><span class="line">v8_enable_disassembler = true</span><br><span class="line">v8_enable_object_print = true</span><br><span class="line">v8_enable_verify_heap = true</span><br></pre></td></tr></table></figure><p>最后编译</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ninja -C out.gn/x64.release d8</span><br></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;一道简单v8例题来看下v8的利用&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="v8pwn" scheme="wood1314.github.io/categories/v8pwn/"/>
+    
+    
+      <category term="v8" scheme="wood1314.github.io/tags/v8/"/>
+    
+  </entry>
   
   <entry>
     <title>v8 学习基础</title>
@@ -442,33 +464,6 @@
     
     
       <category term="writeup" scheme="wood1314.github.io/tags/writeup/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>IO_FILE leak</title>
-    <link href="wood1314.github.io/year/03/15/ckho45o0p000o4cu5r0vpcp0d/"/>
-    <id>wood1314.github.io/year/03/15/ckho45o0p000o4cu5r0vpcp0d/</id>
-    <published>2020-03-15T13:05:23.000Z</published>
-    <updated>2020-03-15T13:24:13.632Z</updated>
-    
-    <content type="html"><![CDATA[<p>上次比赛出了个<code>house of roman</code>思路的题，结果发现这个利用方式已经落后于时代了,当大家纷纷把这题秒了的时候，我顿时对自己产生了怀疑。所以记录一下。。。。</p><p>其实主要思路就是修改<code>stdout</code>的<code>flag</code>位为<code>0xfbad1800</code>,并且将<code>_IO_write_base</code>的最后一个字节改小，从而实现多输出一些内容，这些内容里面就包含了libc地址。</p><a id="more"></a><h2 id="stdout泄露"><a href="#stdout泄露" class="headerlink" title="stdout泄露"></a>stdout泄露</h2><p>为什么<code>flag</code>要改成0xfbad1800，看源码：</p><p><code>puts</code>函数在源码中是由<code>_IO_puts</code>实现的，而<code>_IO_puts</code>函数内部会调用<code>_IO_sputn</code>，结果会执行<code>_IO_new_file_xsputn</code>，最终会执行<code>_IO_overflow</code></p><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> </span><br><span class="line">_IO_new_file_overflow (_IO_FILE *f, <span class="keyword">int</span> ch) </span><br><span class="line">&#123;  </span><br><span class="line">    <span class="keyword">if</span> (f-&gt;_flags &amp; _IO_NO_WRITES) <span class="comment">/* SET ERROR */</span>    </span><br><span class="line">    &#123;<span class="comment">//避免进入      </span></span><br><span class="line">     f-&gt;_flags |= _IO_ERR_SEEN;      </span><br><span class="line">     __set_errno (EBADF);      </span><br><span class="line">     <span class="keyword">return</span> EOF;    </span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="comment">/* If currently reading or no buffer allocated. */</span>  </span><br><span class="line">    <span class="keyword">if</span> ((f-&gt;_flags &amp; _IO_CURRENTLY_PUTTING) == <span class="number">0</span> || f-&gt;_IO_write_base == <span class="literal">NULL</span>)&#123; </span><br><span class="line">    ......<span class="comment">//避免进入    </span></span><br><span class="line">    ......    </span><br><span class="line">&#125;  </span><br><span class="line"><span class="keyword">if</span> (ch == EOF)    </span><br><span class="line">    <span class="keyword">return</span> _IO_do_write (f, f-&gt;_IO_write_base, </span><br><span class="line">                             f-&gt;_IO_write_ptr - f-&gt;_IO_write_base); <span class="comment">//进入目标  </span></span><br><span class="line">    <span class="keyword">if</span> (f-&gt;_IO_write_ptr == f-&gt;_IO_buf_end ) <span class="comment">/* Buffer is really full */</span>    </span><br><span class="line">    <span class="keyword">if</span> (_IO_do_flush (f) == EOF)      </span><br><span class="line">        <span class="keyword">return</span> EOF;  </span><br><span class="line">     *f-&gt;_IO_write_ptr++ = ch;  </span><br><span class="line">     <span class="keyword">if</span> ((f-&gt;_flags &amp; _IO_UNBUFFERED)      </span><br><span class="line">         || ((f-&gt;_flags &amp; _IO_LINE_BUF) &amp;&amp; ch == <span class="string">'\n'</span>))    </span><br><span class="line">        <span class="keyword">if</span> (_IO_do_write (f, f-&gt;_IO_write_base,             </span><br><span class="line">                          f-&gt;_IO_write_ptr - f-&gt;_IO_write_base) == EOF) </span><br><span class="line">        <span class="keyword">return</span> EOF;  </span><br><span class="line">      <span class="keyword">return</span> (<span class="keyword">unsigned</span> <span class="keyword">char</span>) ch; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>可以看到<code>_IO_do_write</code>是最后调用的函数，而<code>_IO_write_base</code>是我们要修改的目标。</p><p>这里<code>f-&gt;_flag &amp; _IO_NO_WRITES</code>的值应该为0，为了不进入第一个if分支</p><p>同时使<code>f-&gt;_flag &amp;_IO_CURRENTLY_PUTTING</code>的值为1，为了不进入第二个if分支</p><p><code>_IO_do_write</code>函数的参数为：stdout结构体、<code>_IO_write_base</code>和<code>size</code>(由<code>f-&gt;_IO_write_ptr - f-&gt;_IO_write_base</code>决定)，而<code>_IO_do_write</code>实际会调用<code>new_do_write</code>，参数一样。</p><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span></span><br><span class="line">_IO_size_t</span><br><span class="line">new_do_write (_IO_FILE *fp, <span class="keyword">const</span> <span class="keyword">char</span> *data, _IO_size_t to_do)</span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  _IO_size_t count;</span><br><span class="line">  <span class="keyword">if</span> (fp-&gt;_flags &amp; _IO_IS_APPENDING)</span><br><span class="line">    fp-&gt;_offset = _IO_pos_BAD;</span><br><span class="line">  <span class="keyword">else</span> <span class="keyword">if</span> (fp-&gt;_IO_read_end != fp-&gt;_IO_write_base)</span><br><span class="line">    &#123;</span><br><span class="line">      _IO_off64_t new_pos</span><br><span class="line">    = _IO_SYSSEEK (fp, fp-&gt;_IO_write_base - fp-&gt;_IO_read_end, <span class="number">1</span>);</span><br><span class="line">      <span class="keyword">if</span> (new_pos == _IO_pos_BAD)</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">      fp-&gt;_offset = new_pos;</span><br><span class="line">    &#125;</span><br><span class="line">  <span class="comment">// 调用函数输出输出缓冲区</span></span><br><span class="line">  count = _IO_SYSWRITE (fp, data, to_do); <span class="comment">//最终输出 </span></span><br><span class="line">  ...</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> count;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>这里，<code>_IO_SYSWRITE</code>就是我们的目标，这相当于<code>write(fp,data,to_do)</code>。</p><p><code>_IO_SYSSEEK</code>只是简单的调用<code>lseek</code>，但是我们不能完全控制<code>fp-&gt;_IO_write_base - fp-&gt;_IO_read_end</code>的值，如果fp-&gt;_IO_read_end的值设置为0，那么<code>_IO_SYSSEEK</code>的第二个参数值就会过大，如果设置<code>fp-&gt;_IO_write_base = fp-&gt;_IO_read_end</code>的话，那么在其它地方就会有问题，因为<code>fp-&gt;_IO_write_base</code> 不能大于 <code>fp-&gt;_IO_write_end</code>。所以这里要设置<code>fp-&gt;_flags | _IO_IS_APPENDING</code>，避免进入else if 分支。</p><p>最终需要构造的fp-flags是这样的，才能绕过上面提到的分支。</p><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">_flags = <span class="number">0xfbad0000</span> </span><br><span class="line">_flags &amp;= ~_IO_NO_WRITES ## _flags = <span class="number">0xfbad0000</span> </span><br><span class="line">_flags |= _IO_CURRENTLY_PUTTING ## _flags = <span class="number">0xfbad0800</span></span><br><span class="line">_flags |= _IO_IS_APPENDING ## _flags = <span class="number">0xfbad1800</span></span><br></pre></td></tr></table></figure><p>所以通常将stdout的flags修改成0xfbad1800，将_IO_write_base改小，就可以造成libc的泄漏。</p>]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;上次比赛出了个&lt;code&gt;house of roman&lt;/code&gt;思路的题，结果发现这个利用方式已经落后于时代了,当大家纷纷把这题秒了的时候，我顿时对自己产生了怀疑。所以记录一下。。。。&lt;/p&gt;
-&lt;p&gt;其实主要思路就是修改&lt;code&gt;stdout&lt;/code&gt;的&lt;code&gt;flag&lt;/code&gt;位为&lt;code&gt;0xfbad1800&lt;/code&gt;,并且将&lt;code&gt;_IO_write_base&lt;/code&gt;的最后一个字节改小，从而实现多输出一些内容，这些内容里面就包含了libc地址。&lt;/p&gt;
-    
-    </summary>
-    
-    
-      <category term="IO_FILE" scheme="wood1314.github.io/tags/IO-FILE/"/>
-    
-      <category term="堆" scheme="wood1314.github.io/tags/%E5%A0%86/"/>
-    
-      <category term="leak" scheme="wood1314.github.io/tags/leak/"/>
-    
-      <category term="tcache" scheme="wood1314.github.io/tags/tcache/"/>
     
   </entry>
   
