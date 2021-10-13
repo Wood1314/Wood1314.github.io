@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+
+    
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Roboto Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="保护措施,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="木头的小木屋" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="最近读论文碰到了CFI和影子堆栈相关，记录一下，添加一些自己的感想。 参考https://blog.csdn.net/zko1021/article/details/85250383 http://readm.tech/2016/11/09/cet-shadow_stacks/">
+<meta name="keywords" content="保护措施">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CFI与影子堆栈">
+<meta property="og:url" content="wood1314.github.io/year/06/28/ckupqhcxe00067y15vf8xjir0/index.html">
+<meta property="og:site_name" content="木头的小木屋">
+<meta property="og:description" content="最近读论文碰到了CFI和影子堆栈相关，记录一下，添加一些自己的感想。 参考https://blog.csdn.net/zko1021/article/details/85250383 http://readm.tech/2016/11/09/cet-shadow_stacks/">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="/28/ckupqhcxe00067y15vf8xjir0/1.png">
+<meta property="og:image" content="/28/ckupqhcxe00067y15vf8xjir0/2.png">
+<meta property="og:image" content="/28/ckupqhcxe00067y15vf8xjir0/3.png">
+<meta property="og:updated_time" content="2020-06-28T07:57:39.312Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CFI与影子堆栈">
+<meta name="twitter:description" content="最近读论文碰到了CFI和影子堆栈相关，记录一下，添加一些自己的感想。 参考https://blog.csdn.net/zko1021/article/details/85250383 http://readm.tech/2016/11/09/cet-shadow_stacks/">
+<meta name="twitter:image" content="/28/ckupqhcxe00067y15vf8xjir0/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="wood1314.github.io/year/06/28/ckupqhcxe00067y15vf8xjir0/">
+
+
+
+
+
+  <title>CFI与影子堆栈 | 木头的小木屋</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">木头的小木屋</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">吃饱混天黑？</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于我
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-list"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br>
+            
+            友情链接
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/06/28/ckupqhcxe00067y15vf8xjir0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wood">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="木头的小木屋">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">CFI与影子堆栈</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-28T12:03:29+08:00">
+                2020-06-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/程序员的自我修养/" itemprop="url" rel="index">
+                    <span itemprop="name">程序员的自我修养</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>最近读论文碰到了CFI和影子堆栈相关，记录一下，添加一些自己的感想。</p>
+<p>参考<a href="https://blog.csdn.net/zko1021/article/details/85250383" target="_blank" rel="noopener">https://blog.csdn.net/zko1021/article/details/85250383</a></p>
+<p><a href="http://readm.tech/2016/11/09/cet-shadow_stacks/" target="_blank" rel="noopener">http://readm.tech/2016/11/09/cet-shadow_stacks/</a></p>
+<a id="more"></a>
+
+<p>本文讨论的原理基于<a href="https://www.researchgate.net/publication/228733728_Control-flow_integrity_principles_implementations_and_applications" target="_blank" rel="noopener">Control-Flow Integrity Principles, Implementations, and Applications</a>这篇论文。</p>
+<h2 id="1-回顾为什么需要CFI"><a href="#1-回顾为什么需要CFI" class="headerlink" title="1 回顾为什么需要CFI"></a>1 回顾为什么需要CFI</h2><h3 id="1-1-劫持控制流"><a href="#1-1-劫持控制流" class="headerlink" title="1.1 劫持控制流"></a>1.1 劫持控制流</h3><ul>
+<li>攻击者能够通过控制流劫持来获取目标机器的控制权，甚至进行提权操作，对目标机器进行全面控制。</li>
+<li>早期的攻击通常采用代码注入的方式，通过上载一段代码，将控制转向这段代码执行。</li>
+<li>代码重用攻击使得硬件支持下的DEP保护机制仍能被绕过。</li>
+</ul>
+<h3 id="1-2-早期防范措施"><a href="#1-2-早期防范措施" class="headerlink" title="1.2 早期防范措施"></a>1.2 早期防范措施</h3><ul>
+<li>堆栈金丝雀[Cowan et al. 1998]，运行时消除缓冲区溢出[Ruwase and Lam 2004]等。</li>
+<li>局限性：缓解范围有限，性能损失高，依赖于硬件修改等。</li>
+<li>What we need：高可靠性，易于理解，强制执行，可部署性，低开销。</li>
+</ul>
+<p>总结下大概早起防范就是金丝雀，和NX保护，以及代码段的随机化。canary保护其实挺强的了，一般的栈溢出是可以做到防护的，但是如果存在类似于任意地址写，格式化字符串漏洞等，还是无法避免返回地址被劫持。</p>
+<h2 id="2-CFI概述"><a href="#2-CFI概述" class="headerlink" title="2 CFI概述"></a>2 CFI概述</h2><p><em>CFI关注的是间接指令，所以在这里对汇编语言中不同寻址方式的指令进行补充说明。</em></p>
+<p>在汇编语言中，根据寻址方式的不同可以分为两种跳转指令。一种是<strong>间接跳转指令</strong>，另一种是<strong>直接跳转指令</strong>。</p>
+<p>直接跳转指令的示例如下所示:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CALL 0x1060000F</span><br></pre></td></tr></table></figure>
+
+<p>在程序执行到这条语句时，就会将指令寄存器的值替换为0x1060000F。这种在指令中直接给出跳转地址的寻址方式就叫做直接转移。在高级语言中, 像if-else，静态函数调用这种跳转目标往往可以确定的语句就会被转换为直接跳转指令。</p>
+<p>间接跳转指令则是使用数据寻址方式间接的指出转移地址，如:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">JMP EBX</span><br></pre></td></tr></table></figure>
+
+<p>执行完这条指令之后，指令寄存器的值就被替换为EBX寄存器的值。它的转换对象为作为回调参数的函数指针等动态决定目标地址的语句。</p>
+<p>在CFI中还有一个比较特殊的分类方式，就是<strong>前向和后向转移</strong>。将控制权定向到程序中一个新位置的转移方式， 就叫做前向转移, 比如jmp和call指令；而将控制权返回到先前位置的就叫做后向转移，最常见的就是ret指令。</p>
+<p>将以上两种分类方式结合起来，前向转移指令call和jmp根据寻址方式不同又可以分为直接jmp, 间接jmp，直接call，间接call四种。而后向<strong>转移指令ret没有操作数</strong>，它的目标地址计算是通过从栈中弹出的数来决定的。正<strong>因为ret指令的特性，引发了一系列针对返回地址的攻击</strong>。</p>
+<h3 id="2-2-核心思想"><a href="#2-2-核心思想" class="headerlink" title="2.2 核心思想"></a>2.2 核心思想</h3><p>限制程序运行中的控制转移，使之始终处于原有的控制流图所限定的范围内。<br><strong>它规定软件执行必须遵循提前确定的控制流图（CFG）的路径。</strong></p>
+<p>通过分析程序的控制流图，获取间接转移指令（包括间接跳转、间接调用、和函数返回指令）目标的白名单，并在运行过程中，核对间接转移指令的目标是否在白名单中。</p>
+<p><strong>通过二进制代码重写实现：插桩—— IDs ID检查</strong></p>
+<p>利用二进制重写技术向软件函数入口及调用返回处分别插入标识符ID和ID_check，通过对比ID和ID_check的值是否一致判断软件的函数执行过程是否符合预期，从而判断软件是否被篡改。</p>
+<h3 id="2-3-示例：通过插桩执行CFI"><a href="#2-3-示例：通过插桩执行CFI" class="headerlink" title="2.3 示例：通过插桩执行CFI"></a>2.3 示例：通过插桩执行CFI</h3><p>CFI要求在程序执行期间，只要机器代码指令转移控制，只能转移到有效目标，这是由提前创建的CFG确定的。</p>
+<blockquote>
+<p>文中提到，期望在不久的将来部署硬件CFI支持是不现实的，所以该文章仅讨论软件CFI实现（也是有局限性的，在提出和发展那篇里曾提到）。内联CFI插桩可以在当前处理器上的软件中实现，特别是在x86处理器上，只需要适度的开销。</p>
+</blockquote>
+<p>CFI插桩根据给定的CFG修改每个源指令和计算控制流传输的每个可能的目标指令。</p>
+<p><em>示例：</em></p>
+<p><img src="/28/ckupqhcxe00067y15vf8xjir0/1.png" alt></p>
+<p>左侧是一个C程序片段，其中函数sort2调用sort的函数排序两次，首先使用lt，然后使用gt。它们作为<strong>指向比较函数的指针</strong>。右侧显示了这四个函数的二进制代码块的轮廓以及它们之间的所有CFG边。</p>
+<ul>
+<li>直接调用的边为浅色虚线箭头</li>
+<li>源指令的边为实线箭头</li>
+<li>返回边为虚线箭头</li>
+</ul>
+<p>因此，CFI检测包括sort2主体中的两个ID，以及从排序返回时的ID检查，使用55（这里是随意使用55来表示）作为ID位模式。同样，因为sort可以调用lt 或者gt，两个比较函数都以ID 17开头; 并且使用寄存器R中的函数指针的调用指令对17执行ID检查。最后，ID 23在sort中标识比较调用点之后的块，因此两个比较函数都检查返回ID 23。</p>
+<p>CFI检测不会影响直接函数调用：<strong>只有间接调用需要ID检查，并且只有间接调用的函数（例如虚方法）才需要添加ID。</strong></p>
+<p>函数返回多个ID检查时，必须在每个函数调用点之后插入ID，无论该函数是否间接调用。剩余的计算控制流通常是switch语句和异常的结果。在两种情况下，每个可能的目标都需要一个ID，并且在发送点需要ID检查。</p>
+<h3 id="2-4-CFI插桩代码"><a href="#2-4-CFI插桩代码" class="headerlink" title="2.4 CFI插桩代码"></a>2.4 CFI插桩代码</h3><p>选择特定的二进制码序列实现ID和ID检查。</p>
+<p><img src="/28/ckupqhcxe00067y15vf8xjir0/2.png" alt></p>
+<p>上图中，这里，目标已在ecx中，所以ID检查不必将其移动到寄存器（通常ID检查需要这样做来避免竞争条件）。跳转指令jmp ecx的目标可能是来自堆栈的mov（下图所示）。</p>
+<p>在（a）中，ID作为数据插入到目标mov指令之前，并且ID检查使用lea指令修改计算的目标，以跳过四个ID字节。ID检查直接将原始目的地与ID值进行比较。ID位模式嵌入在ID-check cmp操作码字节内。 因此，在（a）中，可能以某种方式影响ecx寄存器的值的攻击者可能会导致跳转到jne指令而不是预期的目标。</p>
+<p>（b）通过在ID检查中使用ID-1作为常量并将其递增以在运行时计算ID来避免（a）的微妙之处。 另外，替代方案（b）不修改计算的跳转目标，而是有效地在目标的开始处插入labelID：使用无副作用的x86预取指令来合成labelID指令。（其实这个b我不太懂那个inc eax这个的作用)</p>
+<p><img src="/28/ckupqhcxe00067y15vf8xjir0/3.png" alt></p>
+<h3 id="2-5-CFI的三个重要假设"><a href="#2-5-CFI的三个重要假设" class="headerlink" title="2.5 CFI的三个重要假设"></a>2.5 CFI的三个重要假设</h3><p>实现CFI，三个假设成立至关重要。 这三个假设是：</p>
+<p><strong>UNQ.</strong> 唯一ID：在CFI检测之后，除了ID和ID检查之外，选择为ID的位模式不得出现在代码存储器中的任何位置。通过使ID足够大（例如32位，对于合理大小的软件）并且通过选择ID使得它们不与软件的其余部分中的操作码字节冲突，可以容易地实现该属性。</p>
+<p><strong>NWC.</strong> 不可写代码：程序必须无法在运行时修改代码内存。否则，攻击者可能能够绕过CFI，例如通过覆盖ID检查。除了在加载动态库和运行时代码生成期间，NWC在大多数当前系统中已经是正确的。</p>
+<p><strong>NXD.</strong> 不可执行数据：程序必须不能像执行代码那样执行数据。否则，攻击者可能会导致执行标有预期ID的数据。最新的x86处理器上的硬件支持NXD，Windows XP SP2使用此支持来强制分离代码和数据[Microsoft Corporation 2004]。 NXD也可以用软件实现[PaX Project 2004]。NXD本身（没有CFI）阻止了一些攻击，但不适于那些利用预先存在的代码的攻击，例如“jump-to-libc”攻击。</p>
+<h3 id="2-6-CFI执行的阶段"><a href="#2-6-CFI执行的阶段" class="headerlink" title="2.6 CFI执行的阶段"></a>2.6 CFI执行的阶段</h3><p>第一阶段，即用于CFI执行的CFG的构建，从程序分析到安全策略规范。实际实施可以使用标准控制流分析技术（例如，[Aho et al. 1985; Atkinson 2002; Wagner and Dean 2001]）。</p>
+<p>在CFI检测之后（可能在安装时），另一种机制可以建立UNQ假设。无论何时安装或修改软件，都可以更新ID以保持唯一性，就像某些操作系统中的预绑定信息一样[Apple Computer 2003]。</p>
+<p>最后，CFI验证阶段可以静态验证直接跳转和类似指令，正确插入ID和ID检查以及UNQ属性。验证可以看作是PCC校对检查的一个特例，其中插桩不需要明确的逻辑校验。建立CFI只需要验证：设备中的设计或实施缺陷不会危及安全性。</p>
+<h3 id="2-7-CFI实施"><a href="#2-7-CFI实施" class="headerlink" title="2.7  CFI实施"></a>2.7  CFI实施</h3><blockquote>
+<p>Vulcan [Srivastava et al.2001]：一个成熟的、最先进的x86二进制文件检测系统，既不需要重新编译也不需要源代码访问。该系统以实用的方式解决了二进制代码重写的挑战。</p>
+</blockquote>
+<p>使用Vulcan来构建正在检测的程序的CFG。这个CFG构造正确处理执行计算控制流传输的x86指令，包括函数返回，通过函数指针调用，以及为switch语句和动态调度发出的指令。每个计算出的调用指令可以转到任何采用其地址的函数：通过对二进制文件中的重定位条目进行流不敏感分析来发现这些函数。</p>
+<h2 id="3-影子栈"><a href="#3-影子栈" class="headerlink" title="3 影子栈"></a>3 影子栈</h2><p>当启用影子堆栈时，Near CALL压入返回地址到数据堆栈和影子堆栈上；Near RET 从影子堆栈和数据堆栈弹出返回地址。 如果指定了可选的“n”操作数，则数据堆栈指针（ESP / RSP）可选地进一步增加“n”个字节，但是影子堆栈指针（SSP）不递增。如果从两个堆栈弹出的返回地址不相同，那么处理器会导致#CP（near-ret）异常。</p>
+
+      
+    </div>
+    
+    
+    
+
+      <div>
+        
+          <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+        
+      </div>
+
+    
+
+    
+
+    
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/保护措施/" rel="tag"><i class="fa fa-tag"></i> 保护措施</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/year/06/04/ckupqhcxi000b7y15p245gb8l/" rel="next" title="CVE-2010-2883 Adobe Reader TFF字体SING表栈溢出">
+                <i class="fa fa-chevron-left"></i> CVE-2010-2883 Adobe Reader TFF字体SING表栈溢出
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/year/07/08/ckupqhcxn000p7y15wm07bhpt/" rel="prev" title="PE结构">
+                PE结构 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="Wood">
+            
+              <p class="site-author-name" itemprop="name">Wood</p>
+              <p class="site-description motion-element" itemprop="description">stay hungry stay foolish.</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">66</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">36</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Wood1314" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:wood@nuaa.edu.cn" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友♂链
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://kit4y.github.io/" title="St4ck" target="_blank">St4ck</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://hitworld.github.io/" title="w4rd3n" target="_blank">w4rd3n</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://99mycql.github.io/" title="Mycql" target="_blank">Mycql</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://shiroinu.top/" title="thatshaman" target="_blank">thatshaman</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://dragonliu2018.github.io/" title="Drangon_Liu" target="_blank">Drangon_Liu</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://sophia-ann.github.io" title="sophia-ann" target="_blank">sophia-ann</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://cooook.github.io" title="cooook" target="_blank">cooook</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://desperadoccy.github.io/" title="desperadoccy" target="_blank">desperadoccy</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://cruxssssss.github.io/" title="Crux" target="_blank">Crux</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="noname0519.com" title="noname" target="_blank">noname</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://miaotony.xyz" title="miaotony" target="_blank">miaotony</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-回顾为什么需要CFI"><span class="nav-number">1.</span> <span class="nav-text">1 回顾为什么需要CFI</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-劫持控制流"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 劫持控制流</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-早期防范措施"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 早期防范措施</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-CFI概述"><span class="nav-number">2.</span> <span class="nav-text">2 CFI概述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-核心思想"><span class="nav-number">2.1.</span> <span class="nav-text">2.2 核心思想</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-示例：通过插桩执行CFI"><span class="nav-number">2.2.</span> <span class="nav-text">2.3 示例：通过插桩执行CFI</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-CFI插桩代码"><span class="nav-number">2.3.</span> <span class="nav-text">2.4 CFI插桩代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-5-CFI的三个重要假设"><span class="nav-number">2.4.</span> <span class="nav-text">2.5 CFI的三个重要假设</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-6-CFI执行的阶段"><span class="nav-number">2.5.</span> <span class="nav-text">2.6 CFI执行的阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-7-CFI实施"><span class="nav-number">2.6.</span> <span class="nav-text">2.7  CFI实施</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-影子栈"><span class="nav-number">3.</span> <span class="nav-text">3 影子栈</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Wood</span>
+  
+  
+</div>
+
+<div class="powered-by">
+  <i class="fa fa-user-md"></i><span id="busuanzi_container_site_uv">
+    本站访客数:<span id="busuanzi_value_site_uv"></span>
+  </span>
+</div>
+
+
+  <div class="powered-by"></div>
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitment({
+            id: window.location.pathname, 
+            owner: 'Wood1314',
+            repo: 'for_pinglun',
+            
+            oauth: {
+            
+            
+                client_secret: 'f720411d5aa74b5fbddfe66698e22296599316ec',
+            
+                client_id: '590d9ba949eb93622943'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  + <script type="text/javascript" src="/js/src/instantclick.js" data-no-instant></script>
+  + <script data-no-instant>InstantClick.init();</script>
+</body>
+</html>
