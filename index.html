@@ -426,55 +426,14 @@
 
       
         
-          
-            <h1 id="TCP基础知识"><a href="#TCP基础知识" class="headerlink" title="TCP基础知识"></a>TCP基础知识</h1><h2 id="1-1-TCP报文格式"><a href="#1-1-TCP报文格式" class="headerlink" title="1.1 TCP报文格式"></a>1.1 TCP报文格式</h2><p><img src="https://zhangbinalan.gitbooks.io/protocol/content/Center.gif" alt></p>
-<p>在TCP/IP 连接中比较重要的有</p>
-<ul>
-<li>源端口</li>
-<li>目的端口</li>
-<li>数据序号</li>
-<li>确认序号</li>
-<li>源IP</li>
-<li>目的IP</li>
-</ul>
-<h2 id="1-2-TCP链接状态"><a href="#1-2-TCP链接状态" class="headerlink" title="1.2 TCP链接状态"></a>1.2 TCP链接状态</h2><p>​    <img src="https://pic.imgdb.cn/item/62be68f41d64b0706681fde1.png" alt></p>
-<p>TCP连接生命周期状态：</p>
-<ul>
-<li>LISTEN等待远程的TCP连接请求</li>
-<li>SYS_SENT 发送了建立连接的请求，等待确认消息</li>
-<li>SYN_RECIVED 收到了对方建立连接的请求并发送了建立连接的请求。等待对方确认自己发送的链接请求</li>
-<li>ESTABLISHED 连接已经建立，可以进行正常数据传输</li>
-<li>FIN_WAIT_1 等待对方确认刚刚发送的关闭连接的请求</li>
-<li>FIN_WAIT_2 收到关闭连接请求的确认，等待对方发送关闭连接的请求</li>
-<li>CLOSE_WAIT确认了对方的关闭连接请求，等待本地用户关闭连接指令</li>
-<li>LAST-ACK 被动关闭的一方，在CLOSE-WAIT状态下收到用户关闭连接的指令，发送关闭连接请求，等待确认</li>
-<li>TIME-WAIT 主动关闭连接的一方收到对方发送的对方关闭连接请求的确认消息后,等待足够长的时间（2MSL）以确保对方接收到ACK包.最后回到CLOSED状态，释放网络资源</li>
-<li>CLOSED 关闭状态</li>
-</ul>
-<h2 id="1-3-三次握手"><a href="#1-3-三次握手" class="headerlink" title="1.3 三次握手"></a>1.3 三次握手</h2><p>​    <img src="https://pic.imgdb.cn/item/62c25ea05be16ec74ad66e54.png" alt></p>
-<p>（1）第一次握手：建立连接时，客户端A发送SYN包（SYN=j）到服务器B，并进入SYN_SEND状态，等待服务器B确认。</p>
-<p>（2）第二次握手：服务器B收到SYN包，必须确认客户A的SYN（ACK=j+1），同时自己也发送一个SYN包（SYN=k），即SYN+ACK包，此时服务器B进入SYN_RECV状态。</p>
-<p>（3）第三次握手：客户端A收到服务器B的SYN＋ACK包，向服务器B发送确认包ACK（ACK=k+1），此包发送完毕，客户端A和服务器B进入ESTABLISHED状态，完成三次握手。</p>
-<h2 id="1-4-四次挥手"><a href="#1-4-四次挥手" class="headerlink" title="1.4 四次挥手"></a>1.4 四次挥手</h2><p><img src="https://pic.imgdb.cn/item/62c25fea5be16ec74ad7d2e6.png" alt></p>
-<p>由于TCP连接是全双工的，因此每个方向都必须单独进行关闭。这个原则是当一方完成它的数据发送任务后就能发送一个FIN来终止这个方向的连接。收到一个 FIN只意味着这一方向上没有数据流动，一个TCP连接在收到一个FIN后仍能发送数据。首先进行关闭的一方将执行主动关闭，而另一方执行被动关闭。</p>
-<p>CP的连接的拆除需要发送四个包，因此称为四次挥手(four-way handshake)。客户端或服务器均可主动发起挥手动作，在socket编程中，任何一方执行close()操作即可产生挥手操作。</p>
-<p>（1）客户端A发送一个FIN，用来关闭客户A到服务器B的数据传送。</p>
-<p>（2）服务器B收到这个FIN，它发回一个ACK，确认序号为收到的序号加1。和SYN一样，一个FIN将占用一个序号。</p>
-<p>（3）服务器B关闭与客户端A的连接，发送一个FIN给客户端A。</p>
-<p>（4）客户端A发回ACK报文确认，并将确认序号设置为收到序号加1。</p>
-<p>以上就是TCP协议关闭连接的过程，现在说一下TIME_WAIT状态。<br>从上面可以看到，主动发起关闭连接的操作的一方将达到TIME_WAIT状态，而且这个状态要保持Maximum Segment Lifetime的两倍时间。</p>
-<p>原因有二：<br>一、保证TCP协议的全双工连接能够可靠关闭<br>二、保证这次连接的重复数据段从网络中消失</p>
-<p>先说第一点，如果Client直接CLOSED了，那么由于IP协议的不可靠性或者是其它网络原因，导致Server没有收到Client最后回复的ACK。那么Server就会在超时之后继续发送FIN，此时由于Client已经CLOSED了，就找不到与重发的FIN对应的连接，最后Server就会收到RST而不是ACK，Server就会以为是连接错误把问题报告给高层。这样的情况虽然不会造成数据丢失，但是却导致TCP协议不符合可靠连接的要求。所以，Client不是直接进入CLOSED，而是要保持TIME_WAIT，当再次收到FIN的时候，能够保证对方收到ACK，最后正确的关闭连接。</p>
-<p>再说第二点，如果Client直接CLOSED，然后又再向Server发起一个新连接，我们不能保证这个新连接与刚关闭的连接的端口号是不同的。也就是说有可能新连接和老连接的端口号是相同的。一般来说不会发生什么问题，但是还是有特殊情况出现：假设新连接和已经关闭的老连接端口号是一样的，如果前一次连接的某些数据仍然滞留在网络中，这些延迟数据在建立新连接之后才到达Server，由于新连接和老连接的端口号是一样的，又因为TCP协议判断不同连接的依据是socket pair，于是，TCP协议就认为那个延迟的数据是属于新连接的，这样就和真正的新连接的数据包发生混淆了。所以TCP连接还要在TIME_WAIT状态等待2倍MSL，这样可以保证本次连接的所有数据都从网络中消失。</p>
-<h2 id="1-5-TCP-中的-RST"><a href="#1-5-TCP-中的-RST" class="headerlink" title="1.5 TCP 中的 RST"></a>1.5 TCP 中的 RST</h2><p>RST：（Reset the connection）用于复位因某种原因引起出现的错误连接，也用来拒绝非法数据和请求。如果接收到RST位时候，通常发生了某些错误；<br>发送RST包关闭连接时，不必等缓冲区的包都发出去，直接就丢弃缓冲区中的包，发送RST；<br>接收端收到RST包后，也不必发送ACK包来确认。</p>
-<h3 id="何时发送RST"><a href="#何时发送RST" class="headerlink" title="何时发送RST"></a>何时发送RST</h3><p>1：如果连接是CLOSE状态，所有收到的包都响应RST，仍然保持CLOSED状态<br>如果收到的是ACK报文，RST取ACK报文的ACK序列号为RST报文的SEQ；如果报文不是ACK报文，RST的SEQ为0且ACK字段为收到的报文SEQ+报文长度；</p>
-<p>2：如果连接在non-synchronized状态（LISTEN/SYN-SENT/SYN-RECEIVED），收到的报文ACK的无效的序列号（发送的SYN没有被确认），需要返回RST报文；连接保持原有状态；<br>如果是ACK报文，RST取ACK报文的ACK序列号为RST报文的SEQ；如果报文不是ACK报文，RST的SEQ为0且ACK字段为收到的报文SEQ+报文长度；</p>
-<p>3：如果连接在synchronized状态（ESTABLISHED,FIN-WAIT-1, FIN-WAIT-2, CLOSE-WAIT, CLOSING, LAST-ACK, TIME-WAIT）,如果收到不可接受的报文（序列号不在接收窗口内或者ack的字段不正确），只发送一个确认报文（ACK字段为期望ACK的序列号，SEQ为当前发送序列号），状态变保持原样；</p>
-<h3 id="收到RST报文如何处理"><a href="#收到RST报文如何处理" class="headerlink" title="收到RST报文如何处理"></a>收到RST报文如何处理</h3><p><strong>收到RST报文，除了SYN-SENT状态，都需要校验SEQ字段是否在接收窗口；SYN-SENT状态下，如果RST的确认了刚刚发送的SYN报文，RST才有效；</strong></p>
-<p>校验了RST报文后，如果是在LISTEN状态则保持该状态不需要改变；<br>如果是在SYN-RECIEVED状态且之前在LISTEN状态，恢复为LISTEN状态，如果之前为SYN-RECIEVED状态且之前不是LISTEN状态，则CLOSED；<br>其他状态，关闭连接通知用户，状态变为CLOSED</p>
-<h1 id="针对tcp的攻击"><a href="#针对tcp的攻击" class="headerlink" title="针对tcp的攻击"></a>针对tcp的攻击</h1><p>未完待续</p>
-
-          
+          <p>学习一下tcp阻断。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/year/07/01/cl567gn5h001lbp3ftrc2kh5y/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
