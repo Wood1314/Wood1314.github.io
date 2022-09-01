@@ -108,18 +108,18 @@
 
 
 
-<meta name="description" content="0x00 前言最近网鼎杯青龙组做到了一道chroot逃逸的题目，正好整理一下它逃逸的原理。 0x01 逃逸利用通常来说，chroot一般有两个含义，chroot(1)是/usr/bin/chroot, chroot(2)是glibc中的一个函数。  chroot(1)chroot - run command or interactive shell with special root direct">
+<meta name="description" content="0x00 前言最近网鼎杯青龙组做到了一道chroot逃逸的题目，正好整理一下它逃逸的原理。">
 <meta name="keywords" content="chroot,逃逸">
 <meta property="og:type" content="article">
 <meta property="og:title" content="chroot jailbreak">
 <meta property="og:url" content="wood1314.github.io/year/08/29/cl7iordp7001v293f1sx2f2n5/index.html">
 <meta property="og:site_name" content="木头的小木屋">
-<meta property="og:description" content="0x00 前言最近网鼎杯青龙组做到了一道chroot逃逸的题目，正好整理一下它逃逸的原理。 0x01 逃逸利用通常来说，chroot一般有两个含义，chroot(1)是/usr/bin/chroot, chroot(2)是glibc中的一个函数。  chroot(1)chroot - run command or interactive shell with special root direct">
+<meta property="og:description" content="0x00 前言最近网鼎杯青龙组做到了一道chroot逃逸的题目，正好整理一下它逃逸的原理。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2022-09-01T06:47:56.818Z">
+<meta property="og:updated_time" content="2022-09-01T06:51:01.320Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="chroot jailbreak">
-<meta name="twitter:description" content="0x00 前言最近网鼎杯青龙组做到了一道chroot逃逸的题目，正好整理一下它逃逸的原理。 0x01 逃逸利用通常来说，chroot一般有两个含义，chroot(1)是/usr/bin/chroot, chroot(2)是glibc中的一个函数。  chroot(1)chroot - run command or interactive shell with special root direct">
+<meta name="twitter:description" content="0x00 前言最近网鼎杯青龙组做到了一道chroot逃逸的题目，正好整理一下它逃逸的原理。">
 
 
 
@@ -407,6 +407,8 @@
 
       
         <h2 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h2><p>最近网鼎杯青龙组做到了一道chroot逃逸的题目，正好整理一下它逃逸的原理。</p>
+<a id="more"></a>
+
 <h2 id="0x01-逃逸利用"><a href="#0x01-逃逸利用" class="headerlink" title="0x01 逃逸利用"></a>0x01 逃逸利用</h2><p>通常来说，chroot一般有两个含义，chroot(1)是/usr/bin/chroot, chroot(2)是glibc中的一个函数。</p>
 <blockquote>
 <p>chroot(1)<br>chroot - run command or interactive shell with special root directory<br>chroot [OPTION] NEWROOT [COMMAND [ARG]…]</p>
