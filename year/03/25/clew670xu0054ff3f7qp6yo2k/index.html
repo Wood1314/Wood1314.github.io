@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+
+    
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Roboto Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="内核,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="木头的小木屋" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="最近发现内核pwn题怎么这么多了。。。。感觉发展太快了，学习总结一波吧。">
+<meta name="keywords" content="内核">
+<meta property="og:type" content="article">
+<meta property="og:title" content="内核入门">
+<meta property="og:url" content="wood1314.github.io/year/03/25/clew670xu0054ff3f7qp6yo2k/index.html">
+<meta property="og:site_name" content="木头的小木屋">
+<meta property="og:description" content="最近发现内核pwn题怎么这么多了。。。。感觉发展太快了，学习总结一波吧。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="/25/clew670xu0054ff3f7qp6yo2k/1.png">
+<meta property="og:updated_time" content="2021-03-12T08:32:38.699Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="内核入门">
+<meta name="twitter:description" content="最近发现内核pwn题怎么这么多了。。。。感觉发展太快了，学习总结一波吧。">
+<meta name="twitter:image" content="/25/clew670xu0054ff3f7qp6yo2k/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="wood1314.github.io/year/03/25/clew670xu0054ff3f7qp6yo2k/">
+
+
+
+
+
+  <title>内核入门 | 木头的小木屋</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">木头的小木屋</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">吃饱混天黑？</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于我
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-list"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br>
+            
+            友情链接
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/03/25/clew670xu0054ff3f7qp6yo2k/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wood">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="木头的小木屋">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">内核入门</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-03-25T18:36:11+08:00">
+                2020-03-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/内核/" itemprop="url" rel="index">
+                    <span itemprop="name">内核</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>最近发现内核pwn题怎么这么多了。。。。感觉发展太快了，学习总结一波吧。</p>
+<a id="more"></a>
+<h2 id="1-内核简介"><a href="#1-内核简介" class="headerlink" title="1 内核简介"></a>1 内核简介</h2><h3 id="1-1-内核的组成"><a href="#1-1-内核的组成" class="headerlink" title="1.1 内核的组成"></a>1.1 内核的组成</h3><p>通常一个内核由负责响应中断的<code>中断服务程序</code>，负责管理多个进程从而分享处理器时间的的<code>调度程序</code>，负责管理进程地址空间的<code>内存管理程序</code>和网络、进程间通信等<code>系统服务程序</code>共同组成。</p>
+<h3 id="1-2-内核与应用程序的交互"><a href="#1-2-内核与应用程序的交互" class="headerlink" title="1.2 内核与应用程序的交互"></a>1.2 内核与应用程序的交互</h3><p>在系统中运行的应用程序通过<code>系统调用</code>来于内核通信。应用程序调用库函数（比如C库函数）再由库函数通过系统调用界面，让内核代其完成各种不同的任务。<br>当硬件设备想和系统通信的时候，它首先要发出一个异步的<code>中断信号</code>去打断处理器的执行，继而打断内核函数的执行。中断通常对应着一个中断号，内核通过这个<code>中断号</code>查找对应的<code>中断服务程序</code>，并调用程序相应和处理中断。许多操作系统的<code>中断服务程序</code>，包括linux的，都不在进程上下文执行。它们在一个与所有进程都无关的、专门的中断上下文中运行。</p>
+<p>实际上我们可以将每个处理器在任何指定时间点上的活动必然概括为下列三者之一</p>
+<ul>
+<li>运行于用户空间，执行用户进程 </li>
+<li>运行于内核空间，处于进程上下文，代表某个特定的进程执行</li>
+<li>运行于内核空间，处于中断上下文，与任何进程无关，处理某个特定的中断。<br><img src="/25/clew670xu0054ff3f7qp6yo2k/1.png" alt></li>
+</ul>
+<h3 id="1-3-单内核与微内核"><a href="#1-3-单内核与微内核" class="headerlink" title="1.3 单内核与微内核"></a>1.3 单内核与微内核</h3><h4 id="单内核"><a href="#单内核" class="headerlink" title="单内核"></a>单内核</h4><p>通常以单个静态二进制文件的形式存放于磁盘中。所有内核服务都在这样一个大内核地址空间上运行，内核可以直接调用函数，具有简单和性能高的特点。</p>
+<h4 id="微内核"><a href="#微内核" class="headerlink" title="微内核"></a>微内核</h4><p>微内核的功能被划分为多个独立的过程，每个过程叫做一个服务器</p>
+<p>Linux是一个单内核，但是它汲取了微内核的精华：其引以为豪的是模块化设计，抢占式内核，支持内核线程以及动态装载内核模块的能力。</p>
+<h2 id="2-模块简介"><a href="#2-模块简介" class="headerlink" title="2 模块简介"></a>2 模块简介</h2><p>内核模块是Linux内核向外部提供的一个插口，其全称为动态可加载内核模块（Loadable Kernel Module，LKM），我们简称为模块。Linux内核之所以提供模块机制，是因为它本身是一个单内核（monolithic kernel）。单内核的最大优点是效率高，因为所有的内容都集成在一起，但其缺点是可扩展性和可维护性相对较差，模块机制就是为了弥补这一缺陷。</p>
+<h3 id="2-1-什么是模块"><a href="#2-1-什么是模块" class="headerlink" title="2.1 什么是模块"></a>2.1 什么是模块</h3><p>模块是具有独立功能的程序，它可以被单独编译，但不能独立运行。它在运行时被链接到内核作为内核的一部分在内核空间运行，这与运行在用户空间的进程是不同的。模块通常由一组函数和数据结构组成，用来实现一种文件系统、一个驱动程序或其他内核上层的功能</p>
+<h3 id="2-2-编写一个简单的模块"><a href="#2-2-编写一个简单的模块" class="headerlink" title="2.2 编写一个简单的模块"></a>2.2 编写一个简单的模块</h3><p>模块和内核都在内核空间运行，模块编程在一定意义上说就是内核编程。因为内核版本的每次变化，其中的某些函数名也会相应地发生变化，因此模块编程与内核版本密切相关。以下例子针对2.6内核</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">hellomod.c</span><br><span class="line"><span class="comment">// hello world driver for Linux 2.6</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/module.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/kernel.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/init.h&gt;</span></span></span><br><span class="line"><span class="comment">/* 必要的头文件*/</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> __init <span class="title">lkp_init</span><span class="params">( <span class="keyword">void</span> )</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    printk(“&lt;<span class="number">1</span>&gt;Hello,World! from the kernel space…\n”);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> __exit <span class="title">lkp_cleanup</span><span class="params">( <span class="keyword">void</span> )</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    printk(“&lt;<span class="number">1</span>&gt;Goodbye, World! leaving kernel space…\n”);</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line">module_init(lkp_init);</span><br><span class="line">module_exit(lkp_cleanup);</span><br><span class="line">MODULE_LICENSE(“GPL”);</span><br></pre></td></tr></table></figure>
+
+<p>说明 </p>
+<ul>
+<li>第4行：所有模块都要使用头文件module.h，此文件必须包含进来。</li>
+<li>第5行：头文件kernel.h包含了常用的内核函数。第6行：头文件init.h包含了宏_init和_exit，它们允许释放内核占用的内存。建议浏览一下该文件中的代码和注释。</li>
+<li>第9-12行：这是模块的初始化函数，它必需包含诸如要编译的代码、初始化数据结构等内容。第11行使用了printk()函数，该函数是由内核定义的，功能与C库中的printf()类似，它把要打印的信息输出到终端或系统日志。字符串中的&lt;1&gt;是输出的级别，表示立即在终端输出。</li>
+<li>第15-18行：这是模块的退出和清理函数。此处可以做所有终止该驱动程序时相关的清理工作。</li>
+<li>第20行：这是驱动程序初始化的入口点。对于内置模块，内核在引导时调用该入口点；对于可加载模块则在该模块插入内核时才调用。第21行：对于可加载模块，内核在此处调用module_cleanup（）函数，而对于内置的模块，它什么都不做。第22行：提示可能没有GNU公共许可证。有几个宏是在2.4版的内核中才开发的（详情参见modules.h）。函数module_init()和cleanup_exit()是模块编程中最基本也是必须的两个函数。module_init()向内核注册模块所提供的新功能，而cleanup_exit()注销由模块提供的所有功能。</li>
+</ul>
+<h3 id="2-3-应用程序与内核模块的比较"><a href="#2-3-应用程序与内核模块的比较" class="headerlink" title="2.3 应用程序与内核模块的比较"></a>2.3 应用程序与内核模块的比较</h3><table>
+<thead>
+<tr>
+<th></th>
+<th>C语言应用程序</th>
+<th>内核模块程序</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>使用函数</td>
+<td>Libc库</td>
+<td>内核函数</td>
+</tr>
+<tr>
+<td>运行空间</td>
+<td>用户空间</td>
+<td>内核空间</td>
+</tr>
+<tr>
+<td>运行权限</td>
+<td>普通用户</td>
+<td>超级用户</td>
+</tr>
+<tr>
+<td>入口函数</td>
+<td>main()</td>
+<td>module_init()</td>
+</tr>
+<tr>
+<td>出口函数</td>
+<td>exit()</td>
+<td>module_exit()</td>
+</tr>
+<tr>
+<td>编译</td>
+<td>Gcc –c</td>
+<td>Makefile</td>
+</tr>
+<tr>
+<td>链接</td>
+<td>Gcc</td>
+<td>insmod</td>
+</tr>
+<tr>
+<td>运行</td>
+<td>直接运行</td>
+<td>insmod</td>
+</tr>
+<tr>
+<td>调试</td>
+<td>Gdb</td>
+<td>kdbug, kdb,kgdb等</td>
+</tr>
+</tbody></table>
+<p>从表一我们可以看出，内核模块程序不能调用libc库中的函数，它运行在内核空间，且只有超级用户可以对其运行。另外，模块程序必须通过module_init()和module-exit()函数来告诉内核“我来了”和“我走了”。</p>
+<h3 id="2-4-内核符号表"><a href="#2-4-内核符号表" class="headerlink" title="2.4 内核符号表"></a>2.4 <em>内核符号表</em></h3><p><strong>如 前所述，Linux内核是一个整体结构，像一个圆球，而模块是插入到内核中的插件。尽管内核不是一个可安装模块，但为了方便起见，Linux把内核也看作 一个“母”模块。那么模块与模块之间如何进行交互呢，一种常用的方法就是共享变量和函数。但并不是模块中的每个变量和函数都能被共享，内核只把各个模块中 主要的变量和函数放在一个特定的区段，这些变量和函数就统称为符号。到低哪些符号可以被共享？ Linux内核有自己的规定。对于内核这个特殊的母模块，在kernel/ksyms.c中定义了从中可以“移出”的符号，例如进程管理子系统可以“移出”的符号定义如下</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 进程管理 */</span></span><br><span class="line"></span><br><span class="line">EXPORT_SYMBOL(do_mmap_pgoff);</span><br><span class="line"></span><br><span class="line">EXPORT_SYMBOL(do_munmap);</span><br><span class="line"></span><br><span class="line">EXPORT_SYMBOL(do_brk);</span><br><span class="line"></span><br><span class="line">EXPORT_SYMBOL(exit_mm);</span><br><span class="line"></span><br><span class="line">…</span><br><span class="line"></span><br><span class="line">EXPORT_SYMBOL(schedule);</span><br><span class="line"></span><br><span class="line">EXPORT_SYMBOL(jiffies);</span><br><span class="line"></span><br><span class="line">EXPORT_SYMBOL(xtime);</span><br><span class="line"></span><br><span class="line">…</span><br></pre></td></tr></table></figure>
+
+<p>其中宏定义EXPORT_SYMBOL（）本身的含义是“移出符号”。为什么说是“移出”呢？因为这些符号本来是内核内部的符号，通过这个宏放在一个公开的地方，使得装入到内核中的其他模块可以引用它们。</p>
+<p>实际上，仅仅知道这些符号的名字是不够的，还得知道它们在内核地址空间中的地址才有意义。因此，内核中定义了如下结构来描述模块的符号：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">module_symbol</span></span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">unsigned</span> <span class="keyword">long</span> value; ／*符号在内核地址空间中的地址*/</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">char</span> *name; <span class="comment">/*符号名*/</span></span><br><span class="line"></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>我们可以从/proc/ksyms文件中读取所有内核模块“移出”的符号，这所有符号就形成内核符号表，其格式如下：</p>
+<p>内存地址 符号名 ［所属模块］</p>
+<p>在模块编程中，可以根据符号名从这个文件中检索出其对应的地址，然后直接访问该地址从而获得内核数据。第三列“所属模块”指符号所在的模块名，对于从内核这一母模块移出的符号，这一列为空。</p>
+<p>模块加载后，2.4内核下可通过 /proc/ksyms、 2.6 内核下可通过/proc/kallsyms查看模块输出的内核符号</p>
+<h3 id="2-5-模块依赖"><a href="#2-5-模块依赖" class="headerlink" title="2.5 模块依赖"></a>2.5 模块依赖</h3><p>如前所述，内核符号表记录了所有模块可以访问的符号及相应的地址。当一个新的模块被装入内核后，它所申明的某些符号就会被登记到这个表中，而这些符号可能被其他模块所引用，这就引出了模块依赖这个问题。</p>
+<p>一个模块A引用另一个模块B所移出的符号，我们就说模块B被模块A引用，或者说模块A依赖模块B。如果要链接模块A，必须先链接模块B。这种模块间相互依赖的关系就叫模块依赖。</p>
+<h3 id="2-6-模块引用计数器"><a href="#2-6-模块引用计数器" class="headerlink" title="2.6 模块引用计数器"></a>2.6 模块引用计数器</h3><p>为 了确保模块安全地卸载，每个模块都有一个引用计数器。当执行模块所涉及的操作时就递增计数器，在操作结束时就递减这个计数器；另外，当模块B被模块A引用 时，模块B的引用计数就递增，引用结束，计数器递减。什么时候可以卸载这个模块？当然只有这个计数器值为0的时候，例如，当一个文件系统还被安装在系统上 时就不能将其卸载，当这个文件系统不再被使用时，引用计数器就为0，于是可以卸载。</p>
+<h3 id="2-7-模块编译"><a href="#2-7-模块编译" class="headerlink" title="2.7 模块编译"></a>2.7 模块编译</h3><p>有了Makefile,执行make命令，会自动形成相关的后缀为.o和.ko文件。<br>到此，模块编译好了，该把它插入到内核了：<br>如：$insmod hellomod.ko</p>
+<p> 当然，要以系统员的身份才能把模块插入。</p>
+<p> 成功插入后，可以通过dmesg命令查看，屏幕最后几行的输出就是你程序中输出的内容：Hello,World! from the kernel space…</p>
+<p>当模块不再需要时，可以通过rmmod命令移去，例如</p>
+<p><em>$rmmod hellomod</em></p>
+<h2 id="3-系统调用"><a href="#3-系统调用" class="headerlink" title="3 系统调用"></a>3 系统调用</h2><p>系统调用，顾名思义，说的是操作系统提供给用户程序调用的一组“特殊”接口。用户程序可以通过这组“特殊”接口来获得操作系统内核提供的服务，比如用户可以通过文件系统相关的调用请求系统打开文件、关闭文件或读写文件，可以通过时钟相关的系统调用获得系统时间或设置定时器等。</p>
+<h3 id="3-1-Linux-的系统调用"><a href="#3-1-Linux-的系统调用" class="headerlink" title="3.1 Linux 的系统调用"></a>3.1 Linux 的系统调用</h3><p>下一个需要解释一下的问题是内核函数和系统调用的关系。大家不要把内核函数想像的过于复杂，其实它们和普通函数很像，只不过在内核实现，因此要满足一些内核编程的要求[3]。系统调用是一层用户进入内核的接口，它本身并非内核函数，进入内核后，不同的系统调用会找到对应到各自的内核函数——换个专业说法就叫：系统调用服务例程。实际上针对请求提供服务的是内核函数而非调用接口。</p>
+<p>比如系统调用 getpid实际上就是调用内核函数sys_getpid。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">asmlinkage <span class="keyword">long</span> <span class="title">sys_getpid</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"></span><br><span class="line"><span class="keyword">return</span> current-&gt;tpid;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>总而言之，从用户角度向内核看，依次是系统命令、编程接口、系统调用和内核函数。在讲述了系统调用实现后，我们会回过头来看看整个执行路径。</p>
+<h2 id="4-状态切换"><a href="#4-状态切换" class="headerlink" title="4 状态切换"></a>4 状态切换</h2><h3 id="4-1-user-space-to-kernel-space"><a href="#4-1-user-space-to-kernel-space" class="headerlink" title="4.1 user space to kernel space"></a>4.1 user space to kernel space</h3><p>当发生 <code>系统调用</code>，<code>产生异常</code>，<code>外设产生中断</code>等事件时，会发生用户态到内核态的切换，具体的过程为：</p>
+<ol>
+<li>通过 <code>swapgs</code> 切换 GS 段寄存器，将 GS 寄存器值和一个特定位置的值进行交换，目的是保存 GS 值，同时将该位置的值作为内核执行时的 GS 值使用。</li>
+<li>将当前栈顶（用户空间栈顶）记录在 CPU 独占变量区域里，将 CPU 独占区域里记录的内核栈顶放入 rsp/esp。</li>
+<li>通过 push 保存各寄存器值，具体的 <a href="http://elixir.free-electrons.com/linux/v4.12/source/arch/x86/entry/entry_64.S" target="_blank" rel="noopener">代码</a> 如下:</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"> ENTRY(entry_SYSCALL_64)</span><br><span class="line"> /* SWAPGS_UNSAFE_STACK是一个宏，x86直接定义为swapgs指令 */</span><br><span class="line"> SWAPGS_UNSAFE_STACK</span><br><span class="line">    </span><br><span class="line"> /* 保存栈值，并设置内核栈 */</span><br><span class="line"> movq %rsp, PER_CPU_VAR(rsp_scratch)</span><br><span class="line"> movq PER_CPU_VAR(cpu_current_top_of_stack), %rsp</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">/* 通过push保存寄存器值，形成一个pt_regs结构 */</span><br><span class="line">/* Construct struct pt_regs on stack */</span><br><span class="line">pushq  $__USER_DS      /* pt_regs-&gt;ss */</span><br><span class="line">pushq  PER_CPU_VAR(rsp_scratch)  /* pt_regs-&gt;sp */</span><br><span class="line">pushq  %r11             /* pt_regs-&gt;flags */</span><br><span class="line">pushq  $__USER_CS      /* pt_regs-&gt;cs */</span><br><span class="line">pushq  %rcx             /* pt_regs-&gt;ip */</span><br><span class="line">pushq  %rax             /* pt_regs-&gt;orig_ax */</span><br><span class="line">pushq  %rdi             /* pt_regs-&gt;di */</span><br><span class="line">pushq  %rsi             /* pt_regs-&gt;si */</span><br><span class="line">pushq  %rdx             /* pt_regs-&gt;dx */</span><br><span class="line">pushq  %rcx tuichu    /* pt_regs-&gt;cx */</span><br><span class="line">pushq  $-ENOSYS        /* pt_regs-&gt;ax */</span><br><span class="line">pushq  %r8              /* pt_regs-&gt;r8 */</span><br><span class="line">pushq  %r9              /* pt_regs-&gt;r9 */</span><br><span class="line">pushq  %r10             /* pt_regs-&gt;r10 */</span><br><span class="line">pushq  %r11             /* pt_regs-&gt;r11 */</span><br><span class="line">sub $(6*8), %rsp      /* pt_regs-&gt;bp, bx, r12-15 not saved */</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li><p>通过汇编指令判断是否为 x32_abi。</p>
+</li>
+<li><p>通过系统调用号，跳到全局变量 <code>sys_call_table</code> 相应位置继续执行系统调用。</p>
+</li>
+</ol>
+<h3 id="4-2-kernel-space-to-user-space"><a href="#4-2-kernel-space-to-user-space" class="headerlink" title="4.2 kernel space to user space"></a>4.2 kernel space to user <strong>space</strong></h3><p>退出时，流程如下：</p>
+<ol>
+<li>通过 <code>swapgs</code> 恢复 GS 值</li>
+<li>通过 <code>sysretq</code> 或者 <code>iretq</code> 恢复到用户控件继续执行。如果使用 <code>iretq</code> 还需要给出用户空间的一些信息（CS, eflags/rflags, esp/rsp 等）</li>
+</ol>
+<h3 id="4-3-struct-cred"><a href="#4-3-struct-cred" class="headerlink" title="4.3 struct cred"></a>4.3 struct cred</h3><p>之前提到 kernel 记录了进程的权限，更具体的，是用 cred 结构体记录的，每个进程中都有一个 cred 结构，这个结构保存了该进程的权限等信息（uid，gid 等），如果能修改某个进程的 cred，那么也就修改了这个进程的权限。</p>
+<p><a href="https://code.woboq.org/linux/linux/include/linux/cred.h.html#cred" target="_blank" rel="noopener">源码</a> 如下:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">cred</span> &#123;</span></span><br><span class="line">	<span class="keyword">atomic_t</span>	usage;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> CONFIG_DEBUG_CREDENTIALS</span></span><br><span class="line">	<span class="keyword">atomic_t</span>	subscribers;	<span class="comment">/* number of processes subscribed */</span></span><br><span class="line">	<span class="keyword">void</span>		*put_addr;</span><br><span class="line">	<span class="keyword">unsigned</span>	magic;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CRED_MAGIC	0x43736564</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CRED_MAGIC_DEAD	0x44656144</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">	<span class="keyword">kuid_t</span>		uid;		<span class="comment">/* real UID of the task */</span></span><br><span class="line">	<span class="keyword">kgid_t</span>		gid;		<span class="comment">/* real GID of the task */</span></span><br><span class="line">	<span class="keyword">kuid_t</span>		suid;		<span class="comment">/* saved UID of the task */</span></span><br><span class="line">	<span class="keyword">kgid_t</span>		sgid;		<span class="comment">/* saved GID of the task */</span></span><br><span class="line">	<span class="keyword">kuid_t</span>		euid;		<span class="comment">/* effective UID of the task */</span></span><br><span class="line">	<span class="keyword">kgid_t</span>		egid;		<span class="comment">/* effective GID of the task */</span></span><br><span class="line">	<span class="keyword">kuid_t</span>		fsuid;		<span class="comment">/* UID for VFS ops */</span></span><br><span class="line">	<span class="keyword">kgid_t</span>		fsgid;		<span class="comment">/* GID for VFS ops */</span></span><br><span class="line">	<span class="keyword">unsigned</span>	securebits;	<span class="comment">/* SUID-less security management */</span></span><br><span class="line">	<span class="keyword">kernel_cap_t</span>	cap_inheritable; <span class="comment">/* caps our children can inherit */</span></span><br><span class="line">	<span class="keyword">kernel_cap_t</span>	cap_permitted;	<span class="comment">/* caps we're permitted */</span></span><br><span class="line">	<span class="keyword">kernel_cap_t</span>	cap_effective;	<span class="comment">/* caps we can actually use */</span></span><br><span class="line">	<span class="keyword">kernel_cap_t</span>	cap_bset;	<span class="comment">/* capability bounding set */</span></span><br><span class="line">	<span class="keyword">kernel_cap_t</span>	cap_ambient;	<span class="comment">/* Ambient capability set */</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> CONFIG_KEYS</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">char</span>	jit_keyring;	<span class="comment">/* default keyring to attach requested</span></span><br><span class="line"><span class="comment">					 * keys to */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">key</span> __<span class="title">rcu</span> *<span class="title">session_keyring</span>;</span> <span class="comment">/* keyring inherited over fork */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">key</span>	*<span class="title">process_keyring</span>;</span> <span class="comment">/* keyring private to this process */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">key</span>	*<span class="title">thread_keyring</span>;</span> <span class="comment">/* keyring private to this thread */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">key</span>	*<span class="title">request_key_auth</span>;</span> <span class="comment">/* assumed request_key authority */</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> CONFIG_SECURITY</span></span><br><span class="line">	<span class="keyword">void</span>		*security;	<span class="comment">/* subjective LSM security */</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">user_struct</span> *<span class="title">user</span>;</span>	<span class="comment">/* real user ID subscription */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">user_namespace</span> *<span class="title">user_ns</span>;</span> <span class="comment">/* user_ns the caps and keyrings are relative to. */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">group_info</span> *<span class="title">group_info</span>;</span>	<span class="comment">/* supplementary groups for euid/fsgid */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">rcu_head</span>	<span class="title">rcu</span>;</span>		<span class="comment">/* RCU deletion hook */</span></span><br><span class="line">&#125; __randomize_layout;</span><br></pre></td></tr></table></figure>
+
+<h2 id="5-内核态函数"><a href="#5-内核态函数" class="headerlink" title="5 内核态函数"></a>5 内核态函数</h2><p>相比用户态库函数，内核态的函数有了一些变化</p>
+<ul>
+<li>printf() -&gt; <strong>printk()</strong>，但需要注意的是 printk() 不一定会把内容显示到终端上，但一定在内核缓冲区里，可以通过 <code>dmesg</code> 查看效果</li>
+<li>memcpy() -&gt;<strong>copy_from_user()/copy_to_user()</strong><ul>
+<li>copy_from_user() 实现了将用户空间的数据传送到内核空间</li>
+<li>copy_to_user() 实现了将内核空间的数据传送到用户空间</li>
+</ul>
+</li>
+<li>malloc() -&gt; <strong>kmalloc()</strong>，内核态的内存分配函数，和 malloc() 相似，但使用的是 <code>slab/slub 分配器</code></li>
+<li>free() -&gt; <strong>kfree()</strong>，同 kmalloc()</li>
+</ul>
+<p>另外要注意的是，<code>kernel 管理进程，因此 kernel 也记录了进程的权限</code>。kernel 中有两个可以方便的改变权限的函数：</p>
+<ul>
+<li><strong>int commit_creds(struct cred *new)</strong></li>
+<li><strong>struct cred* prepare_kernel_cred(struct task_struct* daemon)</strong></li>
+</ul>
+<p>从函数名也可以看出，执行 <code>commit_creds(prepare_kernel_cred(0))</code> 即可获得 root 权限（root 的 uid，gid 均为 0）</p>
+<p>执行 <code>commit_creds(prepare_kernel_cred(0))</code> 也是最常用的提权手段，两个函数的地址都可以在 <code>/proc/kallsyms</code> 中查看（较老的内核版本中是 <code>/proc/ksyms</code>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">post sudo grep commit_creds /proc/kallsyms </span><br><span class="line">[sudo] m4x 的密码：</span><br><span class="line">ffffffffbb6af9e0 T commit_creds</span><br><span class="line">ffffffffbc7cb3d0 r __ksymtab_commit_creds</span><br><span class="line">ffffffffbc7f06fe r __kstrtab_commit_creds</span><br><span class="line">post sudo grep prepare_kernel_cred /proc/kallsyms</span><br><span class="line">ffffffffbb6afd90 T prepare_kernel_cred</span><br><span class="line">ffffffffbc7d4f20 r __ksymtab_prepare_kernel_cred</span><br><span class="line">ffffffffbc7f06b7 r __kstrtab_prepare_kernel_cred</span><br></pre></td></tr></table></figure>
+
+<h2 id="6-Ctf-kernel-Pwn-相关"><a href="#6-Ctf-kernel-Pwn-相关" class="headerlink" title="6 Ctf kernel Pwn 相关"></a>6 Ctf kernel Pwn 相关</h2><p>一般会给以下三个文件</p>
+<ol>
+<li>boot.sh: 一个用于启动 kernel 的 shell 的脚本，多用 qemu，保护措施与 qemu 不同的启动参数有关</li>
+<li>bzImage: kernel binary</li>
+<li>rootfs.cpio: 文件系统映像</li>
+</ol>
+<p>比如：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">CISCN2017_babydriver [master●] ls</span><br><span class="line">babydriver.tar</span><br><span class="line">CISCN2017_babydriver [master●] x babydriver.tar</span><br><span class="line">boot.sh</span><br><span class="line">bzImage</span><br><span class="line">rootfs.cpio</span><br><span class="line">CISCN2017_babydriver [master●] ls</span><br><span class="line">babydriver.tar  boot.sh  bzImage  rootfs.cpio</span><br><span class="line">CISCN2017_babydriver [master●] file bzImage</span><br><span class="line">bzImage: Linux kernel x86 boot executable bzImage, version 4.4.72 (atum@ubuntu) <span class="comment">#1 SMP Thu Jun 15 19:52:50 PDT 2017, RO-rootFS, swap_dev 0x6, Normal VGA</span></span><br><span class="line">CISCN2017_babydriver [master●] file rootfs.cpio</span><br><span class="line">rootfs.cpio: gzip compressed data, last modified: Tue Jul  4 08:39:15 2017, max compression, from Unix, original size 2844672</span><br><span class="line">CISCN2017_babydriver [master●] file boot.sh</span><br><span class="line">boot.sh: Bourne-Again shell script, ASCII text executable</span><br><span class="line">CISCN2017_babydriver [master●] bat boot.sh </span><br><span class="line">───────┬─────────────────────────────────────────────────────────────────────────────────</span><br><span class="line">       │ File: boot.sh</span><br><span class="line">───────┼─────────────────────────────────────────────────────────────────────────────────</span><br><span class="line">   1   │ <span class="comment">#!/bin/bash</span></span><br><span class="line">   2   │ </span><br><span class="line">   3   │ qemu-system-x86_64 -initrd rootfs.cpio -kernel bzImage -append <span class="string">'console=ttyS0 ro</span></span><br><span class="line"><span class="string">       │ ot=/dev/ram oops=panic panic=1'</span> -<span class="built_in">enable</span>-kvm -monitor /dev/null -m 64M --nographi</span><br><span class="line">       │ c  -smp cores=1,threads=1 -cpu kvm64,+smep</span><br><span class="line">───────┴─────────────────────────────────────────────────────────────────────────────────</span><br></pre></td></tr></table></figure>
+
+<p>解释一下 qemu 启动的参数：</p>
+<ul>
+<li>-initrd rootfs.cpio，使用 rootfs.cpio 作为内核启动的文件系统</li>
+<li>-kernel bzImage，使用 bzImage 作为 kernel 映像</li>
+<li>-cpu kvm64,+smep，设置 CPU 的安全选项，这里开启了 smep</li>
+<li>-m 64M，设置虚拟 RAM 为 64M，默认为 128M </li>
+</ul>
+<p>其他的选项可以通过 –help 查看。</p>
+<ol start="4">
+<li>本地写好 exploit 后，可以通过 base64 编码等方式把编译好的二进制文件保存到远程目录下，进而拿到 flag</li>
+</ol>
+<h2 id="5-常用指令"><a href="#5-常用指令" class="headerlink" title="5 常用指令"></a>5 常用指令</h2><p>解包</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cpio -idmv &lt; rootfs.cpio</span><br></pre></td></tr></table></figure>
+
+<p>打包</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find . | cpio -o --format=newc &gt; ../core.cpio</span><br></pre></td></tr></table></figure>
+
+<p>编译</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc exp.c -static -masm=intel -g -o exp</span><br></pre></td></tr></table></figure>
+
+<p>查看text段地址</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /sys/module/core/sections/.text</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    
+    
+    
+
+      <div>
+        
+          <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+        
+      </div>
+
+    
+
+    
+
+    
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/内核/" rel="tag"><i class="fa fa-tag"></i> 内核</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/year/03/22/clew670vl0006ff3fm17e7fvr/" rel="next" title="BJDCTF-writeup">
+                <i class="fa fa-chevron-left"></i> BJDCTF-writeup
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/year/04/06/clew670w5000uff3fmyv49hcb/" rel="prev" title="IO_FILE_vtable_check">
+                IO_FILE_vtable_check <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="Wood">
+            
+              <p class="site-author-name" itemprop="name">Wood</p>
+              <p class="site-description motion-element" itemprop="description">stay hungry stay foolish.</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">79</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Wood1314" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:wood@nuaa.edu.cn" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-内核简介"><span class="nav-number">1.</span> <span class="nav-text">1 内核简介</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-内核的组成"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 内核的组成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-内核与应用程序的交互"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 内核与应用程序的交互</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-单内核与微内核"><span class="nav-number">1.3.</span> <span class="nav-text">1.3 单内核与微内核</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#单内核"><span class="nav-number">1.3.1.</span> <span class="nav-text">单内核</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#微内核"><span class="nav-number">1.3.2.</span> <span class="nav-text">微内核</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-模块简介"><span class="nav-number">2.</span> <span class="nav-text">2 模块简介</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-什么是模块"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 什么是模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-编写一个简单的模块"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 编写一个简单的模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-应用程序与内核模块的比较"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 应用程序与内核模块的比较</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-内核符号表"><span class="nav-number">2.4.</span> <span class="nav-text">2.4 内核符号表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-5-模块依赖"><span class="nav-number">2.5.</span> <span class="nav-text">2.5 模块依赖</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-6-模块引用计数器"><span class="nav-number">2.6.</span> <span class="nav-text">2.6 模块引用计数器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-7-模块编译"><span class="nav-number">2.7.</span> <span class="nav-text">2.7 模块编译</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-系统调用"><span class="nav-number">3.</span> <span class="nav-text">3 系统调用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-Linux-的系统调用"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 Linux 的系统调用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-状态切换"><span class="nav-number">4.</span> <span class="nav-text">4 状态切换</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-user-space-to-kernel-space"><span class="nav-number">4.1.</span> <span class="nav-text">4.1 user space to kernel space</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-kernel-space-to-user-space"><span class="nav-number">4.2.</span> <span class="nav-text">4.2 kernel space to user space</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-struct-cred"><span class="nav-number">4.3.</span> <span class="nav-text">4.3 struct cred</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-内核态函数"><span class="nav-number">5.</span> <span class="nav-text">5 内核态函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-Ctf-kernel-Pwn-相关"><span class="nav-number">6.</span> <span class="nav-text">6 Ctf kernel Pwn 相关</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-常用指令"><span class="nav-number">7.</span> <span class="nav-text">5 常用指令</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Wood</span>
+  
+  
+</div>
+
+<div class="powered-by">
+  <i class="fa fa-user-md"></i><span id="busuanzi_container_site_uv">
+    本站访客数:<span id="busuanzi_value_site_uv"></span>
+  </span>
+</div>
+
+
+  <div class="powered-by"></div>
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitment({
+            id: window.location.pathname, 
+            owner: 'Wood1314',
+            repo: 'for_pinglun',
+            
+            oauth: {
+            
+            
+                client_secret: 'f720411d5aa74b5fbddfe66698e22296599316ec',
+            
+                client_id: '590d9ba949eb93622943'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  + <script type="text/javascript" src="/js/src/instantclick.js" data-no-instant></script>
+  + <script data-no-instant>InstantClick.init();</script>
+</body>
+</html>

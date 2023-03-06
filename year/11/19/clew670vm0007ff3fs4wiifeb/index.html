@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+
+    
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Roboto Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="fuzz,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="木头的小木屋" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="最近在写跟AFL有关的fuzz，因此就大概过了一下AFL的源码。这里大概记录一下自己看的过程。">
+<meta name="keywords" content="fuzz">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AFL初探">
+<meta property="og:url" content="wood1314.github.io/year/11/19/clew670vm0007ff3fs4wiifeb/index.html">
+<meta property="og:site_name" content="木头的小木屋">
+<meta property="og:description" content="最近在写跟AFL有关的fuzz，因此就大概过了一下AFL的源码。这里大概记录一下自己看的过程。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://pic.imgdb.cn/item/6197bea02ab3f51d910dd366.png">
+<meta property="og:image" content="https://pic.imgdb.cn/item/6197beb62ab3f51d910de2e1.png">
+<meta property="og:updated_time" content="2021-11-19T15:25:05.036Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AFL初探">
+<meta name="twitter:description" content="最近在写跟AFL有关的fuzz，因此就大概过了一下AFL的源码。这里大概记录一下自己看的过程。">
+<meta name="twitter:image" content="https://pic.imgdb.cn/item/6197bea02ab3f51d910dd366.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="wood1314.github.io/year/11/19/clew670vm0007ff3fs4wiifeb/">
+
+
+
+
+
+  <title>AFL初探 | 木头的小木屋</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">木头的小木屋</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">吃饱混天黑？</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于我
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-list"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br>
+            
+            友情链接
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/11/19/clew670vm0007ff3fs4wiifeb/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wood">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="木头的小木屋">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">AFL初探</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-11-19T22:53:07+08:00">
+                2021-11-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>最近在写跟AFL有关的fuzz，因此就大概过了一下AFL的源码。这里大概记录一下自己看的过程。</p>
+<a id="more"></a>
+
+<h2 id="0x01-AFL基本使用"><a href="#0x01-AFL基本使用" class="headerlink" title="0x01 AFL基本使用"></a>0x01 AFL基本使用</h2><h3 id="1-1-使用AFL程序插桩"><a href="#1-1-使用AFL程序插桩" class="headerlink" title="1.1 使用AFL程序插桩"></a>1.1 使用AFL程序插桩</h3><p>目标程序</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;signal.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">vuln</span><span class="params">(<span class="keyword">char</span> *str)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> len = <span class="built_in">strlen</span>(str);</span><br><span class="line">    <span class="keyword">if</span>(str[<span class="number">0</span>] == <span class="string">'A'</span> &amp;&amp; len == <span class="number">66</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        raise(SIGSEGV);</span><br><span class="line">        <span class="comment">//如果输入的字符串的首字符为A并且长度为66，则异常退出</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span>(str[<span class="number">0</span>] == <span class="string">'F'</span> &amp;&amp; len == <span class="number">6</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        raise(SIGSEGV);</span><br><span class="line">        <span class="comment">//如果输入的字符串的首字符为F并且长度为6，则异常退出</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"it is good!\\n"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> *argv[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">char</span> buf[<span class="number">100</span>]=&#123;<span class="number">0</span>&#125;;</span><br><span class="line">    gets(buf);<span class="comment">//存在栈溢出漏洞</span></span><br><span class="line">    <span class="built_in">printf</span>(buf);<span class="comment">//存在格式化字符串漏洞</span></span><br><span class="line">    vuln(buf);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用afl-gcc进行插桩编译</p>
+<blockquote>
+<p>afl-gcc -g -o ./zerotest/vuln ./zerotest/vuln.c</p>
+</blockquote>
+<h3 id="1-2-开始fuzz"><a href="#1-2-开始fuzz" class="headerlink" title="1.2 开始fuzz"></a>1.2 开始fuzz</h3><blockquote>
+<p>afl-fuzz -m 300 -i ./zerotest/fuzz_in -o ./zerotest/fuzz_out ./zerotest/vuln -f</p>
+</blockquote>
+<p>PS: 常见参数的含义如下</p>
+<ul>
+<li>f参数表示：testcase的内容会作为afl_test的stdin</li>
+<li>m参数表示分配的内存空间</li>
+<li>i 指定测试样本的路径</li>
+<li>o 指定输出结果的路径</li>
+<li>/dev/null 使错误信息不输出到屏幕</li>
+<li>t：设置程序运行超时值，单位为 ms</li>
+<li>M：运行主(Master) Fuzzer</li>
+<li>S：运行从属(Slave) Fuzzer</li>
+</ul>
+<h3 id="1-3-fuzz的结果"><a href="#1-3-fuzz的结果" class="headerlink" title="1.3 fuzz的结果"></a>1.3 fuzz的结果</h3><p><img src="https://pic.imgdb.cn/item/6197bea02ab3f51d910dd366.png" alt="Image.png"></p>
+<p>从界面上主要注意以下几点:</p>
+<ol>
+<li>last new path 如果报错那么要及时修正命令行参数，不然继续fuzz也是徒劳（因为路径是不会改变的）；</li>
+<li>cycles done 如果变绿就说明后面及时继续fuzz，出现crash的几率也很低了，可以选择在这个时候停止</li>
+<li>uniq crashes 代表的是crash的数量</li>
+</ol>
+<h3 id="1-4-crash分析"><a href="#1-4-crash分析" class="headerlink" title="1.4 crash分析"></a>1.4 crash分析</h3><p><img src="https://pic.imgdb.cn/item/6197beb62ab3f51d910de2e1.png" alt="Image [2].png"></p>
+<p>PS: xxd命令的作用就是将一个文件以十六进制的形式显示出来</p>
+<p>看起来上面两个crash，第一个大概是栈溢出，第二个看起来是F开头，字符长度为6触发的</p>
+<h2 id="0x02-源码阅读"><a href="#0x02-源码阅读" class="headerlink" title="0x02 源码阅读"></a>0x02 源码阅读</h2><h3 id="2-1-合法代码插桩——插入调用-afl-maybe-log的汇编码"><a href="#2-1-合法代码插桩——插入调用-afl-maybe-log的汇编码" class="headerlink" title="2.1 合法代码插桩——插入调用__afl_maybe_log的汇编码"></a>2.1 合法代码插桩——插入调用__afl_maybe_log的汇编码</h3><p>若<code>pass_thru</code>、<code>skip_intel</code>、<code>skip_app</code>、<code>skip_csect</code>四个标志位均被清除，且<code>instr_ok</code>(这个标志位表征当前读入的行处于.text部分，将在后续设置，初始为清除状态)、<code>instrument_next</code>两个标志位均被设置，且当前行的第一个字符是<code>\\t</code>且第二个字符是字母，则向已插桩的文件写入<code>trampoline_fmt_64/trampoline_fmt_32</code>(取决于use_64bit标志位状态)<br>经整理最后插入的汇编代码为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">/* --- AFL TRAMPOLINE (32-BIT) --- */</span><br><span class="line">.align 4</span><br><span class="line">leal -16(%esp), %esp</span><br><span class="line">movl %edi,  0(%esp)</span><br><span class="line">movl %edx,  4(%esp)</span><br><span class="line">movl %ecx,  8(%esp)</span><br><span class="line">movl %eax, 12(%esp)</span><br><span class="line">movl $0x%08x, %ecx</span><br><span class="line">call __afl_maybe_log</span><br><span class="line">movl 12(%esp), %eax</span><br><span class="line">movl  8(%esp), %ecx</span><br><span class="line">movl  4(%esp), %edx</span><br><span class="line">movl  0(%esp), %edi</span><br><span class="line">leal 16(%esp), %esp</span><br><span class="line">/* --- END --- */</span><br><span class="line"></span><br><span class="line">/* --- AFL TRAMPOLINE (64-BIT) --- */</span><br><span class="line">.align 4</span><br><span class="line">leaq -(128+24)(%rsp), %rsp</span><br><span class="line">movq %rdx,  0(%rsp)</span><br><span class="line">movq %rcx,  8(%rsp)</span><br><span class="line">movq %rax, 16(%rsp)</span><br><span class="line">movq $0x%08x, %rcx</span><br><span class="line">call __afl_maybe_log</span><br><span class="line">movq 16(%rsp), %rax</span><br><span class="line">movq  8(%rsp), %rcx</span><br><span class="line">movq  0(%rsp), %rdx</span><br><span class="line">leaq (128+24)(%rsp), %rsp</span><br><span class="line">/* --- END --- */</span><br></pre></td></tr></table></figure>
+
+<p>⚠️：此处的<code>%08x</code>由<code>(random() % ((1 &lt;&lt; 16)))</code>生成，在编译期确定。插入结束后，将<code>instrument_next</code>标志位清除，桩代码计数器<code>ins_lines</code>加一。最后将原始的汇编码（即line变量的内容），追加到插桩后文件中。此时检查<code>pass_thru</code>标志位是否被置位，若已置位，则忽略以下流程，继续循环，读取下一行待插桩文件。</p>
+<h3 id="2-2-寻找合法有效的待插桩段"><a href="#2-2-寻找合法有效的待插桩段" class="headerlink" title="2.2 寻找合法有效的待插桩段"></a>2.2 寻找合法有效的待插桩段</h3><p>这里是真正的插桩函数的核心了，但是在这里我们真正感兴趣的事实上只有<code>.text</code>段</p>
+<p>简单概括就是，先找到<code>.text</code>段，不在该段的情况下不会进行打桩操作</p>
+<p>然后会在分支跳转（条件分支跳转）的部分插入<code>trampoline_fmt_64/trampoline_fmt_32</code></p>
+<p>注意，JMP表示无条件跳转，因此其另一条分支将永远不会被运行到，那么将不会影响代码覆盖率，因此不在JMP指令后插桩。</p>
+<p>识别label以后，会在label的下一行插入<code>trampoline_fmt_64/trampoline_fmt_32</code></p>
+<h3 id="2-3-末尾插桩代码"><a href="#2-3-末尾插桩代码" class="headerlink" title="2.3 末尾插桩代码"></a>2.3 末尾插桩代码</h3><p>最后，若桩代码计数器<code>ins_lines</code>不为0，那么将<code>main_payload_64/main_payload_32</code>(取决于use_64bit标志位状态)插入整个汇编文件末尾。</p>
+<p>main_payload_64整体逻辑如下</p>
+<p>简要概括就是，将随机生成的<code>rcx</code>与一个值做一个抑或，再把以此作为索引的共享区加一。<br>相当于一个散列表，这样可以知道fuzz是不是经过了一个新的基本块。</p>
+<h2 id="0x03-AFL-变异部分源码分析"><a href="#0x03-AFL-变异部分源码分析" class="headerlink" title="0x03 AFL 变异部分源码分析"></a>0x03 AFL 变异部分源码分析</h2><h3 id="3-1-fuzz-one"><a href="#3-1-fuzz-one" class="headerlink" title="3.1 fuzz_one"></a>3.1 fuzz_one</h3><blockquote>
+<p>Take the current entry from the queue, fuzz it for a while. This function is a tad too long…</p>
+</blockquote>
+<p>首先把testcase映射在内存中，主要是把<code>testcase</code>里的内容读进<code>in_buf</code>里</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Map the test case into memory. */</span></span><br><span class="line"></span><br><span class="line">  fd = open(queue_cur-&gt;fname, O_RDONLY);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (fd &lt; <span class="number">0</span>) PFATAL(<span class="string">"Unable to open '%s'"</span>, queue_cur-&gt;fname);</span><br><span class="line"></span><br><span class="line">  len = queue_cur-&gt;len;</span><br><span class="line"></span><br><span class="line">  orig_in = in_buf = mmap(<span class="number">0</span>, len, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (orig_in == MAP_FAILED) PFATAL(<span class="string">"Unable to mmap '%s'"</span>, queue_cur-&gt;fname);</span><br><span class="line"></span><br><span class="line">  close(fd);</span><br></pre></td></tr></table></figure>
+
+<p>接着对testcase进行一个裁剪的过程，然后把<code>in_buf</code>里的内容拷贝到<code>out_buf</code>里</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/************</span></span><br><span class="line"><span class="comment">   * TRIMMING *</span></span><br><span class="line"><span class="comment">   ************/</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (!dumb_mode &amp;&amp; !queue_cur-&gt;trim_done) &#123;</span><br><span class="line"></span><br><span class="line">    u8 res = trim_case(argv, queue_cur, in_buf);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (res == FAULT_ERROR)</span><br><span class="line">      FATAL(<span class="string">"Unable to execute target application"</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (stop_soon) &#123;</span><br><span class="line">      cur_skipped_paths++;</span><br><span class="line">      <span class="keyword">goto</span> abandon_entry;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Don't retry trimming, even if it failed. */</span></span><br><span class="line"></span><br><span class="line">    queue_cur-&gt;trim_done = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (len != queue_cur-&gt;len) len = queue_cur-&gt;len;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="built_in">memcpy</span>(out_buf, in_buf, len);</span><br></pre></td></tr></table></figure>
+
+<p>计算<code>performance</code> <code>score</code> ,这个值的计算方法有点复杂，先留个坑，暂且不深究</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*********************</span></span><br><span class="line"><span class="comment">   * PERFORMANCE SCORE *</span></span><br><span class="line"><span class="comment">   *********************/</span></span><br><span class="line"></span><br><span class="line">  orig_perf = perf_score = calculate_score(queue_cur);</span><br><span class="line"></span><br><span class="line">  <span class="comment">/* Skip right away if -d is given, if we have done deterministic fuzzing on</span></span><br><span class="line"><span class="comment">     this entry ourselves (was_fuzzed), or if it has gone through deterministic</span></span><br><span class="line"><span class="comment">     testing in earlier, resumed runs (passed_det). */</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (skip_deterministic || queue_cur-&gt;was_fuzzed || queue_cur-&gt;passed_det)</span><br><span class="line">    <span class="keyword">goto</span> havoc_stage;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/* Skip deterministic fuzzing if exec path checksum puts this out of scope</span></span><br><span class="line"><span class="comment">     for this master instance. */</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (master_max &amp;&amp; (queue_cur-&gt;exec_cksum % master_max) != master_id - <span class="number">1</span>)</span><br><span class="line">    <span class="keyword">goto</span> havoc_stage;</span><br><span class="line"></span><br><span class="line">  doing_det = <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+
+<p>第一阶段的<code>Bitflip</code> 也就是 <code>bitflip 1/1</code>  ，可以看到 <code>stage_max = len &lt;&lt; 3;</code>  然后进行了<code>stage_max</code>次数的循环，也就是每字节会做8次bitflip，逐个字节逐个比特进行反转。</p>
+<p>反转后调用<code>common_fuzz_stuff</code>  函数，进行fuzz，fuzz过后再次把比特反转回复过来。</p>
+<p>在这个阶段还实现了采集<code>token</code>的功能。即如果连续几个字节，反转其最后一个比特后其执行路径相同，且与初始路径不同。那么这连续的几个字节很大概率是有特殊语义的<code>token</code> ，属于关键字性质的。</p>
+<p>例如，PNG文件中用IHDR作为起始块的标识，那么就会存在类似于以下的内容</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">........IHDR........</span><br></pre></td></tr></table></figure>
+
+<p>当翻转到字符<code>I</code>的最高位时，因为<code>IHDR</code>被破坏，此时程序的执行路径肯定与处理正常文件的路径是不同的；随后，在翻转接下来3个字符的最高位时，<code>IHDR</code>标识同样被破坏，程序应该会采取同样的执行路径。由此，AFL就判断得到一个可能的token：<code>IHDR</code>，并将其记录下来为后面的变异提供备选。</p>
+<p>AFL采取的这种方式是非常巧妙的：就本质而言，这实际上是对每个byte进行修改并检查执行路径；但集成到bitflip后，就不需要再浪费额外的执行资源了。此外，为了控制这样自动生成的token的大小和数量，AFL还在<code>config.h</code>中通过宏定义了限制：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Length limits for auto-detected dictionary tokens: */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> MIN_AUTO_EXTRA 3 #<span class="meta-keyword">define</span> MAX_AUTO_EXTRA 32 </span></span><br><span class="line"><span class="comment">/* Maximum number of auto-extracted dictionary tokens to actually use in fuzzing (first value), and to keep in memory as candidates. The latter should be much higher than the former. */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> USE_AUTO_EXTRAS 10 </span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> MAX_AUTO_EXTRAS (USE_AUTO_EXTRAS * 10)</span></span><br></pre></td></tr></table></figure>
+
+<p>对于一些文件来说，我们已知其格式中出现的token长度不会超过4，那么我们就可以修改MAX_AUTO_EXTRA为4并重新编译AFL，以排除一些明显不会是token的情况。遗憾的是，这些设置是通过宏定义来实现，所以不能做到运行时指定，每次修改后必须重新编译AFL。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*********************************************</span></span><br><span class="line"><span class="comment">   * SIMPLE BITFLIP (+dictionary construction) *</span></span><br><span class="line"><span class="comment">   *********************************************/</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> FLIP_BIT(_ar, _b) do &#123; \</span></span><br><span class="line">    u8* _arf = (u8*)(_ar); \</span><br><span class="line">    u32 _bf = (_b); \</span><br><span class="line">    _arf[(_bf) &gt;&gt; <span class="number">3</span>] ^= (<span class="number">128</span> &gt;&gt; ((_bf) &amp; <span class="number">7</span>)); \</span><br><span class="line">  &#125; <span class="keyword">while</span> (<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">  <span class="comment">/* Single walking bit. */</span></span><br><span class="line"></span><br><span class="line">  stage_short = <span class="string">"flip1"</span>;</span><br><span class="line">  stage_max   = len &lt;&lt; <span class="number">3</span>;</span><br><span class="line">  stage_name  = <span class="string">"bitflip 1/1"</span>;</span><br><span class="line"></span><br><span class="line">  stage_val_type = STAGE_VAL_NONE;</span><br><span class="line"></span><br><span class="line">  orig_hit_cnt = queued_paths + unique_crashes;</span><br><span class="line"></span><br><span class="line">  prev_cksum = queue_cur-&gt;exec_cksum;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (stage_cur = <span class="number">0</span>; stage_cur &lt; stage_max; stage_cur++) &#123;</span><br><span class="line"></span><br><span class="line">    stage_cur_byte = stage_cur &gt;&gt; <span class="number">3</span>;</span><br><span class="line"></span><br><span class="line">    FLIP_BIT(out_buf, stage_cur);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (common_fuzz_stuff(argv, out_buf, len)) <span class="keyword">goto</span> abandon_entry;</span><br><span class="line"></span><br><span class="line">    FLIP_BIT(out_buf, stage_cur);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* While flipping the least significant bit in every byte, pull of an extra</span></span><br><span class="line"><span class="comment">       trick to detect possible syntax tokens. In essence, the idea is that if</span></span><br><span class="line"><span class="comment">       you have a binary blob like this:</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">       xxxxxxxxIHDRxxxxxxxx</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">       ...and changing the leading and trailing bytes causes variable or no</span></span><br><span class="line"><span class="comment">       changes in program flow, but touching any character in the "IHDR" string</span></span><br><span class="line"><span class="comment">       always produces the same, distinctive path, it's highly likely that</span></span><br><span class="line"><span class="comment">       "IHDR" is an atomically-checked magic value of special significance to</span></span><br><span class="line"><span class="comment">       the fuzzed format.</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">       We do this here, rather than as a separate stage, because it's a nice</span></span><br><span class="line"><span class="comment">       way to keep the operation approximately "free" (i.e., no extra execs).</span></span><br><span class="line"><span class="comment">       </span></span><br><span class="line"><span class="comment">       Empirically, performing the check when flipping the least significant bit</span></span><br><span class="line"><span class="comment">       is advantageous, compared to doing it at the time of more disruptive</span></span><br><span class="line"><span class="comment">       changes, where the program flow may be affected in more violent ways.</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">       The caveat is that we won't generate dictionaries in the -d mode or -S</span></span><br><span class="line"><span class="comment">       mode - but that's probably a fair trade-off.</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">       This won't work particularly well with paths that exhibit variable</span></span><br><span class="line"><span class="comment">       behavior, but fails gracefully, so we'll carry out the checks anyway.</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">      */</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!dumb_mode &amp;&amp; (stage_cur &amp; <span class="number">7</span>) == <span class="number">7</span>) &#123;</span><br><span class="line"></span><br><span class="line">      u32 cksum = hash32(trace_bits, MAP_SIZE, HASH_CONST);</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (stage_cur == stage_max - <span class="number">1</span> &amp;&amp; cksum == prev_cksum) &#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* If at end of file and we are still collecting a string, grab the</span></span><br><span class="line"><span class="comment">           final character and force output. */</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (a_len &lt; MAX_AUTO_EXTRA) a_collect[a_len] = out_buf[stage_cur &gt;&gt; <span class="number">3</span>];</span><br><span class="line">        a_len++;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (a_len &gt;= MIN_AUTO_EXTRA &amp;&amp; a_len &lt;= MAX_AUTO_EXTRA)</span><br><span class="line">          maybe_add_auto(a_collect, a_len);</span><br><span class="line"></span><br><span class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (cksum != prev_cksum) &#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* Otherwise, if the checksum has changed, see if we have something</span></span><br><span class="line"><span class="comment">           worthwhile queued up, and collect that if the answer is yes. */</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (a_len &gt;= MIN_AUTO_EXTRA &amp;&amp; a_len &lt;= MAX_AUTO_EXTRA)</span><br><span class="line">          maybe_add_auto(a_collect, a_len);</span><br><span class="line"></span><br><span class="line">        a_len = <span class="number">0</span>;</span><br><span class="line">        prev_cksum = cksum;</span><br><span class="line"></span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="comment">/* Continue collecting string, but only if the bit flip actually made</span></span><br><span class="line"><span class="comment">         any difference - we don't want no-op tokens. */</span></span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (cksum != queue_cur-&gt;exec_cksum) &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (a_len &lt; MAX_AUTO_EXTRA) a_collect[a_len] = out_buf[stage_cur &gt;&gt; <span class="number">3</span>];        </span><br><span class="line">        a_len++;</span><br><span class="line"></span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  new_hit_cnt = queued_paths + unique_crashes;</span><br><span class="line"></span><br><span class="line">  stage_finds[STAGE_FLIP1]  += new_hit_cnt - orig_hit_cnt;</span><br><span class="line">  stage_cycles[STAGE_FLIP1] += stage_max;</span><br></pre></td></tr></table></figure>
+
+<p>后面跟着的就是2比特2比特的逐个翻转，4比特4比特位移是1位的逐个翻转，然后是1字节1字节的翻转等等等。。。。总之是长度不一，步长不同的比特反转。</p>
+<p>在进行<code>bitflip 8/8变异</code>时，AFL还生成了一个非常重要的信息：<code>effector map</code>。这个effector map几乎贯穿了整个<code>deterministic</code> <code>fuzzing</code>的始终。</p>
+<p>具体地，在对每个byte进行翻转时，如果其造成执行路径与原始路径不一致，就将该byte在effector map中标记为1，即“有效”的，否则标记为0，即“无效”的。</p>
+<p>这样做的逻辑是：如果一个byte完全翻转，都无法带来执行路径的变化，那么这个byte很有可能是属于”<code>data</code>”，而非”<code>metadata</code>”（例如size, flag等），对整个fuzzing的意义不大。所以，在随后的一些变异中，会参考<code>effector</code> <code>map</code>，跳过那些“无效”的byte，从而节省了执行资源。</p>
+<p>由此，通过极小的开销（没有增加额外的执行次数），AFL又一次对文件格式进行了启发式的判断。看到这里，不得不叹服于AFL实现上的精妙。</p>
+<p>不过，在某些情况下并不会检测有效字符。第一种情况就是dumb mode或者从fuzzer，此时文件所有的字符都有可能被变异。第二、第三种情况与文件本身有关：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Minimum input file length at which the effector logic kicks in: */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> EFF_MIN_LEN 128 </span></span><br><span class="line"><span class="comment">/* Maximum effector density past which everything is just fuzzed unconditionally (%): */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> EFF_MAX_PERC 90</span></span><br></pre></td></tr></table></figure>
+
+<p>即默认情况下，如果文件小于128 bytes，那么所有字符都是“有效”的；同样地，如果AFL发现一个文件有超过90%的bytes都是“有效”的，那么也不差那10%了，大笔一挥，干脆把所有字符都划归为“有效”。</p>
+<p>后面仍有arithmetic，interest，dictionary，havoc，splice，cycle等变异手段。具体可以参考<a href="https://rk700.github.io/2018/01/04/afl-mutations/" target="_blank" rel="noopener">https://rk700.github.io/2018/01/04/afl-mutations/</a>  此处不再赘述。</p>
+<p>总而言之，AFL的变异策略既有逐位变异的运气成分，同时也合理运用了覆盖率反馈的信息来启发性的创造<code>token</code> 和 <code>effort map</code> 等概念，帮助算法更好的进行变异。</p>
+<h3 id="3-2-save-if-interesting"><a href="#3-2-save-if-interesting" class="headerlink" title="3.2 save_if_interesting"></a>3.2 save_if_interesting</h3><p>覆盖率反馈信息除了一定程度上可以启发性的指导变异以外，最大作用就是在这个函数内实现的选种功能。</p>
+<p>如果这个has_new_bits返回为0的话，那么该函数直接返回0，程序继续进行下一次的fuzz。但是如果发现了新的cov信息或者bb信息，那么就会将产生新路径的testcase保存为新的种子。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (!(hnb = has_new_bits(virgin_bits))) &#123;</span><br><span class="line">      <span class="keyword">if</span> (crash_mode) total_crashes++;</span><br><span class="line">      <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>代表<code>current</code> 是刚刚返回的覆盖率信息,<code>virgin_map</code>是当前我们的覆盖率状态。可以注意到<code>virgin_map</code>在<code>setup_shm</code>过程中被初始化成了全 <code>1</code> ,  代表<code>current</code>的<code>trace_bits</code> 初始化状态是全0的状态。根据插桩部分的逻辑，每有新的覆盖率信息，会在相应的<code>trace_bits</code>索引位置加一。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">memset</span>(virgin_bits, <span class="number">255</span>, MAP_SIZE);</span><br><span class="line"><span class="built_in">memset</span>(trace_bits, <span class="number">0</span>, MAP_SIZE);</span><br></pre></td></tr></table></figure>
+
+<p>每个<code>trace_bits</code>对应索引里的值其实就代表着走到这条路径的次数，当第<code>1，4，8，128</code>次走到这条路径时，<code>current</code>里的值就是<code>0</code>，而<code>virgin_map</code>里的值则是<code>ff</code>，此时函数将返回2<code>。</code>其余情况都会返回<code>1</code>。最后将<code>current</code>里的值取反，然后与<code>vrigin</code>相与，更新<code>virgin</code>的状态。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Check if the current execution path brings anything new to the table.</span></span><br><span class="line"><span class="comment">   Update virgin bits to reflect the finds. Returns 1 if the only change is</span></span><br><span class="line"><span class="comment">   the hit-count for a particular tuple; 2 if there are new tuples seen. </span></span><br><span class="line"><span class="comment">   Updates the map, so subsequent calls will always return 0.</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">   This function is called after every exec() on a fairly large buffer, so</span></span><br><span class="line"><span class="comment">   it needs to be fast. We do this in 32-bit and 64-bit flavors. */</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">inline</span> u8 <span class="title">has_new_bits</span><span class="params">(u8* virgin_map)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> WORD_SIZE_64</span></span><br><span class="line"></span><br><span class="line">  u64* current = (u64*)trace_bits;</span><br><span class="line">  u64* virgin  = (u64*)virgin_map;</span><br><span class="line"></span><br><span class="line">  u32  i = (MAP_SIZE &gt;&gt; <span class="number">3</span>);</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">else</span></span></span><br><span class="line"></span><br><span class="line">  u32* current = (u32*)trace_bits;</span><br><span class="line">  u32* virgin  = (u32*)virgin_map;</span><br><span class="line"></span><br><span class="line">  u32  i = (MAP_SIZE &gt;&gt; <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span> <span class="comment">/* ^WORD_SIZE_64 */</span></span></span><br><span class="line"></span><br><span class="line">  u8   ret = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span> (i--) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Optimize for (*current &amp; *virgin) == 0 - i.e., no bits in current bitmap</span></span><br><span class="line"><span class="comment">       that have not been already cleared from the virgin map - since this will</span></span><br><span class="line"><span class="comment">       almost always be the case. */</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (unlikely(*current) &amp;&amp; unlikely(*current &amp; *virgin)) &#123;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (likely(ret &lt; <span class="number">2</span>)) &#123;</span><br><span class="line"></span><br><span class="line">        u8* cur = (u8*)current;</span><br><span class="line">        u8* vir = (u8*)virgin;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* Looks like we have not found any new bytes yet; see if any non-zero</span></span><br><span class="line"><span class="comment">           bytes in current[] are pristine in virgin[]. */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> WORD_SIZE_64</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> ((cur[<span class="number">0</span>] &amp;&amp; vir[<span class="number">0</span>] == <span class="number">0xff</span>) || (cur[<span class="number">1</span>] &amp;&amp; vir[<span class="number">1</span>] == <span class="number">0xff</span>) ||</span><br><span class="line">            (cur[<span class="number">2</span>] &amp;&amp; vir[<span class="number">2</span>] == <span class="number">0xff</span>) || (cur[<span class="number">3</span>] &amp;&amp; vir[<span class="number">3</span>] == <span class="number">0xff</span>) ||</span><br><span class="line">            (cur[<span class="number">4</span>] &amp;&amp; vir[<span class="number">4</span>] == <span class="number">0xff</span>) || (cur[<span class="number">5</span>] &amp;&amp; vir[<span class="number">5</span>] == <span class="number">0xff</span>) ||</span><br><span class="line">            (cur[<span class="number">6</span>] &amp;&amp; vir[<span class="number">6</span>] == <span class="number">0xff</span>) || (cur[<span class="number">7</span>] &amp;&amp; vir[<span class="number">7</span>] == <span class="number">0xff</span>)) ret = <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">else</span> ret = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">else</span></span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> ((cur[<span class="number">0</span>] &amp;&amp; vir[<span class="number">0</span>] == <span class="number">0xff</span>) || (cur[<span class="number">1</span>] &amp;&amp; vir[<span class="number">1</span>] == <span class="number">0xff</span>) ||</span><br><span class="line">            (cur[<span class="number">2</span>] &amp;&amp; vir[<span class="number">2</span>] == <span class="number">0xff</span>) || (cur[<span class="number">3</span>] &amp;&amp; vir[<span class="number">3</span>] == <span class="number">0xff</span>)) ret = <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">else</span> ret = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span> <span class="comment">/* ^WORD_SIZE_64 */</span></span></span><br><span class="line"></span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      *virgin &amp;= ~*current;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    current++;</span><br><span class="line">    virgin++;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (ret &amp;&amp; virgin_map == virgin_bits) bitmap_changed = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> ret;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="0x04-参考"><a href="#0x04-参考" class="headerlink" title="0x04 参考"></a>0x04 参考</h2><p>AFL源码分析（I）——白盒模式下的afl-gcc分析 - 安全客，安全资讯平台 (<a href="http://anquanke.com/" target="_blank" rel="noopener">anquanke.com</a>)</p>
+<p>[AFL内部实现细节小记](</p>
+
+      
+    </div>
+    
+    
+    
+
+      <div>
+        
+          <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+        
+      </div>
+
+    
+
+    
+
+    
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/fuzz/" rel="tag"><i class="fa fa-tag"></i> fuzz</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/year/10/17/clew670vo0009ff3f4sfj215s/" rel="next" title="ByteCtf writeup">
+                <i class="fa fa-chevron-left"></i> ByteCtf writeup
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/year/11/22/clew670vi0003ff3fgnqnt5wv/" rel="prev" title="2.33下的house of pig">
+                2.33下的house of pig <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="Wood">
+            
+              <p class="site-author-name" itemprop="name">Wood</p>
+              <p class="site-description motion-element" itemprop="description">stay hungry stay foolish.</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">79</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Wood1314" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:wood@nuaa.edu.cn" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#0x01-AFL基本使用"><span class="nav-number">1.</span> <span class="nav-text">0x01 AFL基本使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-使用AFL程序插桩"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 使用AFL程序插桩</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-开始fuzz"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 开始fuzz</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-fuzz的结果"><span class="nav-number">1.3.</span> <span class="nav-text">1.3 fuzz的结果</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-4-crash分析"><span class="nav-number">1.4.</span> <span class="nav-text">1.4 crash分析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x02-源码阅读"><span class="nav-number">2.</span> <span class="nav-text">0x02 源码阅读</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-合法代码插桩——插入调用-afl-maybe-log的汇编码"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 合法代码插桩——插入调用__afl_maybe_log的汇编码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-寻找合法有效的待插桩段"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 寻找合法有效的待插桩段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-末尾插桩代码"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 末尾插桩代码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x03-AFL-变异部分源码分析"><span class="nav-number">3.</span> <span class="nav-text">0x03 AFL 变异部分源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-fuzz-one"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 fuzz_one</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-save-if-interesting"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 save_if_interesting</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x04-参考"><span class="nav-number">4.</span> <span class="nav-text">0x04 参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Wood</span>
+  
+  
+</div>
+
+<div class="powered-by">
+  <i class="fa fa-user-md"></i><span id="busuanzi_container_site_uv">
+    本站访客数:<span id="busuanzi_value_site_uv"></span>
+  </span>
+</div>
+
+
+  <div class="powered-by"></div>
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitment({
+            id: window.location.pathname, 
+            owner: 'Wood1314',
+            repo: 'for_pinglun',
+            
+            oauth: {
+            
+            
+                client_secret: 'f720411d5aa74b5fbddfe66698e22296599316ec',
+            
+                client_id: '590d9ba949eb93622943'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  + <script type="text/javascript" src="/js/src/instantclick.js" data-no-instant></script>
+  + <script data-no-instant>InstantClick.init();</script>
+</body>
+</html>

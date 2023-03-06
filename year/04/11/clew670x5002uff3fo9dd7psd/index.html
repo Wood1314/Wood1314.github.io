@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+
+    
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Roboto Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="largebin_attack,heap,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="木头的小木屋" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="0x00 前言largebin attack 以前就是稍微看过，没怎么做过题，这里总结下largebin的管理机制,然后做一两道题练手然后就开始深入内核pwn的学习了。感觉自己刷题还是不够，等以赛代练吧。">
+<meta name="keywords" content="largebin_attack,heap">
+<meta property="og:type" content="article">
+<meta property="og:title" content="largebin_attack">
+<meta property="og:url" content="wood1314.github.io/year/04/11/clew670x5002uff3fo9dd7psd/index.html">
+<meta property="og:site_name" content="木头的小木屋">
+<meta property="og:description" content="0x00 前言largebin attack 以前就是稍微看过，没怎么做过题，这里总结下largebin的管理机制,然后做一两道题练手然后就开始深入内核pwn的学习了。感觉自己刷题还是不够，等以赛代练吧。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2020-04-17T15:16:05.401Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="largebin_attack">
+<meta name="twitter:description" content="0x00 前言largebin attack 以前就是稍微看过，没怎么做过题，这里总结下largebin的管理机制,然后做一两道题练手然后就开始深入内核pwn的学习了。感觉自己刷题还是不够，等以赛代练吧。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="wood1314.github.io/year/04/11/clew670x5002uff3fo9dd7psd/">
+
+
+
+
+
+  <title>largebin_attack | 木头的小木屋</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">木头的小木屋</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">吃饱混天黑？</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于我
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-list"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-links">
+          <a href="/links" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br>
+            
+            友情链接
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/04/11/clew670x5002uff3fo9dd7psd/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Wood">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="木头的小木屋">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">largebin_attack</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-04-11T18:14:56+08:00">
+                2020-04-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/漏洞利用/" itemprop="url" rel="index">
+                    <span itemprop="name">漏洞利用</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h2><p>largebin attack 以前就是稍微看过，没怎么做过题，这里总结下largebin的管理机制,然后做一两道题练手然后就开始深入内核pwn的学习了。感觉自己刷题还是不够，等以赛代练吧。</p>
+<a id="more"></a>
+
+<h2 id="0x01-lagrgebin-管理机制"><a href="#0x01-lagrgebin-管理机制" class="headerlink" title="0x01 lagrgebin 管理机制"></a>0x01 lagrgebin 管理机制</h2><p>large bins 中一共包括 63 个 bin，每个 bin 中的 chunk 的大小不一致，而是处于一定区间范围内。此外，这 63 个 bin 被分成了 6 组，每组 bin 中的 chunk 大小之间的公差一致，具体如下：</p>
+<table>
+<thead>
+<tr>
+<th>组</th>
+<th>数量</th>
+<th>公差</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>32</td>
+<td>64B</td>
+</tr>
+<tr>
+<td>2</td>
+<td>16</td>
+<td>512B</td>
+</tr>
+<tr>
+<td>3</td>
+<td>8</td>
+<td>4096B</td>
+</tr>
+<tr>
+<td>4</td>
+<td>4</td>
+<td>32768B</td>
+</tr>
+<tr>
+<td>5</td>
+<td>2</td>
+<td>262144B</td>
+</tr>
+<tr>
+<td>6</td>
+<td>1</td>
+<td>不限制</td>
+</tr>
+</tbody></table>
+<p>与smallbin不同的是，largebin中不再是一个index只对应一个大小的size，而是存储等差数列变化的chunk块。其相关定义如下：</p>
+<p>这个宏写的真的是十分优雅</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> largebin_index_64(sz)                                                \</span></span><br><span class="line">  (((((<span class="keyword">unsigned</span> <span class="keyword">long</span>) (sz)) &gt;&gt; <span class="number">6</span>) &lt;= <span class="number">48</span>) ?  <span class="number">48</span> + (((<span class="keyword">unsigned</span> <span class="keyword">long</span>) (sz)) &gt;&gt; <span class="number">6</span>) :\</span><br><span class="line">   ((((<span class="keyword">unsigned</span> <span class="keyword">long</span>) (sz)) &gt;&gt; <span class="number">9</span>) &lt;= <span class="number">20</span>) ?  <span class="number">91</span> + (((<span class="keyword">unsigned</span> <span class="keyword">long</span>) (sz)) &gt;&gt; <span class="number">9</span>) :\</span><br><span class="line">   ((((<span class="keyword">unsigned</span> <span class="keyword">long</span>) (sz)) &gt;&gt; <span class="number">12</span>) &lt;= <span class="number">10</span>) ? <span class="number">110</span> + (((<span class="keyword">unsigned</span> <span class="keyword">long</span>) (sz)) &gt;&gt; <span class="number">12</span>) :\</span><br><span class="line">   ((((<span class="keyword">unsigned</span> <span class="keyword">long</span>) (sz)) &gt;&gt; <span class="number">15</span>) &lt;= <span class="number">4</span>) ? <span class="number">119</span> + (((<span class="keyword">unsigned</span> <span class="keyword">long</span>) (sz)) &gt;&gt; <span class="number">15</span>) :\</span><br><span class="line">   ((((<span class="keyword">unsigned</span> <span class="keyword">long</span>) (sz)) &gt;&gt; <span class="number">18</span>) &lt;= <span class="number">2</span>) ? <span class="number">124</span> + (((<span class="keyword">unsigned</span> <span class="keyword">long</span>) (sz)) &gt;&gt; <span class="number">18</span>) :\</span><br><span class="line">   <span class="number">126</span>)</span><br></pre></td></tr></table></figure>
+
+<p>largebin管理的是一个范围区间的堆块，此时<code>fd_nextsize</code>与<code>bk_nextsize</code>就派上了用场。</p>
+<p>大小对应相同index中的堆块，其在链表中的排序方式为：</p>
+<ul>
+<li><p>堆块从大到小排序。</p>
+</li>
+<li><p>对于相同大小的堆块，最先释放的堆块会成为堆头，其<code>fd_nextsize</code>与<code>bk_nextsize</code>会被赋值，其余的堆块释放后都会插入到该堆头结点的下一个结点，通过<code>fd</code>与<code>bk</code>链接，形成了先释放的在链表后面的排序方式，且其<code>fd_nextsize</code>与<code>bk_nextsize</code>都为0。</p>
+</li>
+<li><p>不同大小的堆块通过堆头串联，即堆头中<code>fd_nextsize</code>指向比它小的堆块的堆头，<code>bk_nextsize</code>指向比它大的堆块的堆头，从而形成了第一点中的从大到小排序堆块的方式。同时最大的堆块的堆头的<code>bk_nextsize</code>指向最小的堆块的堆头，最小堆块的堆头的<code>fd_nextsize</code>指向最大堆块的堆头，以此形成循环双链表。</p>
+</li>
+</ul>
+<p>接下来具体看源码中是如何实现将largebin chunk从unsorted bin中取下来放入到largebin中的。</p>
+ <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* place chunk in bin */</span></span><br><span class="line"></span><br><span class="line">          <span class="keyword">if</span> (in_smallbin_range (size))</span><br><span class="line">            &#123;</span><br><span class="line">              ...  <span class="comment">// chunk为smallbin，放入到smallbin中</span></span><br><span class="line">            &#125;</span><br><span class="line">          <span class="keyword">else</span></span><br><span class="line">            &#123;</span><br><span class="line">              victim_index = largebin_index (size);<span class="comment">//第一步，获取当前要插入的chunk对应的index</span></span><br><span class="line">              bck = bin_at (av, victim_index); <span class="comment">//当前index中最小的chunk</span></span><br><span class="line">              fwd = bck-&gt;fd;                   <span class="comment">//当前index中最大的chunk</span></span><br><span class="line"></span><br><span class="line">              <span class="comment">/* maintain large bins in sorted order */</span></span><br><span class="line">              <span class="keyword">if</span> (fwd != bck)</span><br><span class="line">                &#123; <span class="comment">// 该chunk对应的largebin index中不为空</span></span><br><span class="line">                  <span class="comment">/* Or with inuse bit to speed comparisons */</span></span><br><span class="line">                  size |= PREV_INUSE;</span><br><span class="line">                  <span class="comment">/* if smaller than smallest, bypass loop below */</span></span><br><span class="line">                  assert ((bck-&gt;bk-&gt;size &amp; NON_MAIN_ARENA) == <span class="number">0</span>);</span><br><span class="line">                  <span class="keyword">if</span> ((<span class="keyword">unsigned</span> <span class="keyword">long</span>) (size) &lt; (<span class="keyword">unsigned</span> <span class="keyword">long</span>) (bck-&gt;bk-&gt;size)) <span class="comment">//第三步，如果要插入的chunk的size小于当前index中最小chunk的大小，则直接插入到最后面。</span></span><br><span class="line">                    &#123;</span><br><span class="line">                      fwd = bck;</span><br><span class="line">                      bck = bck-&gt;bk;</span><br><span class="line"></span><br><span class="line">                      victim-&gt;fd_nextsize = fwd-&gt;fd;</span><br><span class="line">                      victim-&gt;bk_nextsize = fwd-&gt;fd-&gt;bk_nextsize;</span><br><span class="line">                      fwd-&gt;fd-&gt;bk_nextsize = victim-&gt;bk_nextsize-&gt;fd_nextsize = victim;</span><br><span class="line">                    &#125;</span><br><span class="line">                  <span class="keyword">else</span></span><br><span class="line">                    &#123;</span><br><span class="line">                      assert ((fwd-&gt;size &amp; NON_MAIN_ARENA) == <span class="number">0</span>);</span><br><span class="line">                      <span class="keyword">while</span> ((<span class="keyword">unsigned</span> <span class="keyword">long</span>) size &lt; fwd-&gt;size) <span class="comment">//第四步，如果插入的chunk不为最小，则通过`fd_nextsize`从大到小遍历chunk，找到小于等于要插入chunk的位置</span></span><br><span class="line">                        &#123;</span><br><span class="line">                          fwd = fwd-&gt;fd_nextsize;</span><br><span class="line">                          assert ((fwd-&gt;size &amp; NON_MAIN_ARENA) == <span class="number">0</span>);</span><br><span class="line">                        &#125;</span><br><span class="line"></span><br><span class="line">                      <span class="keyword">if</span> ((<span class="keyword">unsigned</span> <span class="keyword">long</span>) size == (<span class="keyword">unsigned</span> <span class="keyword">long</span>) fwd-&gt;size)</span><br><span class="line">                        <span class="comment">/* Always insert in the second position.  */</span></span><br><span class="line">                        fwd = fwd-&gt;fd; <span class="comment">//第五步，如果存在堆头，则插入到堆头的下一个节点</span></span><br><span class="line">                      <span class="keyword">else</span></span><br><span class="line">                        &#123; <span class="comment">//第六步，否则这个chunk将会成为堆头，`bk_nextsize`和`fd_nextsize`将被置位</span></span><br><span class="line">                          victim-&gt;fd_nextsize = fwd;</span><br><span class="line">                          victim-&gt;bk_nextsize = fwd-&gt;bk_nextsize;</span><br><span class="line">                          fwd-&gt;bk_nextsize = victim;</span><br><span class="line">                          victim-&gt;bk_nextsize-&gt;fd_nextsize = victim;</span><br><span class="line">                        &#125;</span><br><span class="line">                      bck = fwd-&gt;bk;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">              <span class="keyword">else</span>   <span class="comment">//第二步，chunk对应的largebin index中为空</span></span><br><span class="line">                victim-&gt;fd_nextsize = victim-&gt;bk_nextsize = victim;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">          mark_bin (av, victim_index);</span><br><span class="line">          <span class="comment">//设置fd与bk完成插入</span></span><br><span class="line">          victim-&gt;bk = bck; </span><br><span class="line">          victim-&gt;fd = fwd;</span><br><span class="line">          fwd-&gt;bk = victim;</span><br><span class="line">          bck-&gt;fd = victim;</span><br><span class="line">          ...</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+
+<p>整个流程可以总结为：</p>
+<ol>
+<li>找到当前要插入的chunk对应的largebin的index，并定位该index中的最小的chunk<code>bck</code>和最大的chunk<code>fwd</code>。</li>
+<li>如果<code>fwd</code>等于<code>bck</code>，表明当前链表为空，则直接将该chunk插入，并设置该chunk为该大小堆块的堆头，将<code>bk_nextsize</code>和<code>fd_nextsize</code>赋值为它本身。</li>
+<li>如果<code>fwd</code>不等于<code>bck</code>，表明当前链表已经存在chunk，要做的就是找到当前chunk对应的位置将其插入。首先判断其大小是否小于最小chunk的size，<code>(size) &lt; (bck-&gt;bk-&gt;size)</code>，如果小于则说明该chunk为当前链表中最小的chunk，即插入位置在链表末尾，无需遍历链表，直接插入到链表的末尾，且该chunk没有对应的堆头，设置该chunk为相应堆大小堆的堆头，将<code>bk_nextsize</code>指向比它大的堆头，<code>fd_nextsize</code>指向双链表的第一个节点即最大的堆头。</li>
+<li>如果当前chunk的size不是最小的chunk，则从双链表的第一个节点即最大的chunk的堆头开始遍历，通过<code>fd_nextsize</code>进行遍历，由于<code>fd_nextsize</code>指向的是比当前堆头小的堆头，因此可以加快遍历速度。直到找到小于等于要插入的chunk的size。</li>
+<li>如果找到的chunk的size等于要插入chunk的size，则说明当前要插入的chunk的size已经存在堆头，那么只需将该chunk插入到堆头的下一个节点。</li>
+<li>如果找到的chunk的size小于当前要插入chunk的size，则说明当前插入的chunk不存在堆头，因此该chunk会成为堆头插入到该位置，设置<code>fd_nextsize</code>与<code>bk_nextsize</code>。</li>
+</ol>
+<p>通过源码分析可以与之前的排序方式对应上，接下来我们再看largebin是如何被申请出来的。</p>
+<p>相关源代码如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">         If a large request, scan through the chunks of current bin in</span></span><br><span class="line"><span class="comment">         sorted order to find smallest that fits.  Use the skip list for this.</span></span><br><span class="line"><span class="comment">       */</span></span><br><span class="line">      <span class="keyword">if</span> (!in_smallbin_range (nb))</span><br><span class="line">        &#123;</span><br><span class="line">          bin = bin_at (av, idx); <span class="comment">//找到申请的size对应的largebin链表</span></span><br><span class="line"></span><br><span class="line">          <span class="comment">/* skip scan if empty or largest chunk is too small */</span></span><br><span class="line">          <span class="keyword">if</span> ((victim = first (bin)) != bin &amp;&amp;</span><br><span class="line">              (<span class="keyword">unsigned</span> <span class="keyword">long</span>) (victim-&gt;size) &gt;= (<span class="keyword">unsigned</span> <span class="keyword">long</span>) (nb)) <span class="comment">//第一步，判断链表的第一个结点，即最大的chunk是否大于要申请的size</span></span><br><span class="line">            &#123;</span><br><span class="line">              victim = victim-&gt;bk_nextsize; </span><br><span class="line">              <span class="keyword">while</span> (((<span class="keyword">unsigned</span> <span class="keyword">long</span>) (size = chunksize (victim)) &lt;</span><br><span class="line">                      (<span class="keyword">unsigned</span> <span class="keyword">long</span>) (nb))) <span class="comment">//第二步，从最小的chunk开始，反向遍历 chunk size链表，直到找到第一个大于等于所需chunk大小的chunk退出循环</span></span><br><span class="line">                victim = victim-&gt;bk_nextsize; </span><br><span class="line"></span><br><span class="line">              <span class="comment">/* Avoid removing the first entry for a size so that the skip</span></span><br><span class="line"><span class="comment">                 list does not have to be rerouted.  */</span></span><br><span class="line">              <span class="keyword">if</span> (victim != last (bin) &amp;&amp; victim-&gt;size == victim-&gt;fd-&gt;size) <span class="comment">//第三步，申请的chunk对应的chunk存在多个结点，则申请相应堆头的下个结点，不申请堆头。</span></span><br><span class="line">                victim = victim-&gt;fd;</span><br><span class="line"></span><br><span class="line">              remainder_size = size - nb;</span><br><span class="line">              unlink (av, victim, bck, fwd); <span class="comment">//第四步，largebin unlink 操作</span></span><br><span class="line"></span><br><span class="line">              <span class="comment">/* Exhaust */</span></span><br><span class="line">              <span class="keyword">if</span> (remainder_size &lt; MINSIZE) <span class="comment">//第五步，如果剩余的空间小于MINSIZE，则将该空间直接给用户</span></span><br><span class="line">                &#123;</span><br><span class="line">                  set_inuse_bit_at_offset (victim, size);</span><br><span class="line">                  <span class="keyword">if</span> (av != &amp;main_arena)</span><br><span class="line">                    victim-&gt;size |= NON_MAIN_ARENA;</span><br><span class="line">                &#125;</span><br><span class="line">              <span class="comment">/* Split */</span></span><br><span class="line">              <span class="keyword">else</span></span><br><span class="line">                &#123;</span><br><span class="line">                  remainder = chunk_at_offset (victim, nb); <span class="comment">//第六步，如果当前剩余空间还可以构成chunk，则将剩余的空间放入到unsorted bin中。</span></span><br><span class="line">                  <span class="comment">/* We cannot assume the unsorted list is empty and therefore</span></span><br><span class="line"><span class="comment">                     have to perform a complete insert here.  */</span></span><br><span class="line">                  bck = unsorted_chunks (av);</span><br><span class="line">                  fwd = bck-&gt;fd;</span><br><span class="line">      <span class="keyword">if</span> (__glibc_unlikely (fwd-&gt;bk != bck))</span><br><span class="line">                    &#123;</span><br><span class="line">                      errstr = <span class="string">"malloc(): corrupted unsorted chunks"</span>;</span><br><span class="line">                      <span class="keyword">goto</span> errout;</span><br><span class="line">                    &#125;</span><br><span class="line">                  remainder-&gt;bk = bck;</span><br><span class="line">                  remainder-&gt;fd = fwd;</span><br><span class="line">                  bck-&gt;fd = remainder;</span><br><span class="line">                  fwd-&gt;bk = remainder;</span><br><span class="line">                  <span class="keyword">if</span> (!in_smallbin_range (remainder_size))</span><br><span class="line">                    &#123;</span><br><span class="line">                      remainder-&gt;fd_nextsize = <span class="literal">NULL</span>;</span><br><span class="line">                      remainder-&gt;bk_nextsize = <span class="literal">NULL</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                  set_head (victim, nb | PREV_INUSE |</span><br><span class="line">                            (av != &amp;main_arena ? NON_MAIN_ARENA : <span class="number">0</span>));</span><br><span class="line">                  set_head (remainder, remainder_size | PREV_INUSE);</span><br><span class="line">                  set_foot (remainder, remainder_size);</span><br><span class="line">                &#125;</span><br><span class="line">              check_malloced_chunk (av, victim, nb);</span><br><span class="line">              <span class="keyword">void</span> *p = chunk2mem (victim);</span><br><span class="line">              alloc_perturb (p, bytes);</span><br><span class="line">              <span class="keyword">return</span> p;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以将整个流程总结为：</p>
+<ol>
+<li><p>找到当前要申请的空间对应的largebin链表，判断第一个结点即最大结点的大小是否大于要申请的空间，如果小于则说明largebin中没有合适的堆块，需采用其他分配方式。</p>
+</li>
+<li><p>如果当前largebin中存在合适的堆块，则从最小堆块开始，通过<code>bk_nextsize</code>反向遍历链表，找到大于等于当前申请空间的结点。</p>
+</li>
+<li><p>为减少操作，判断找到的相应结点（堆头）的下个结点是否是相同大小的堆块，如果是的话，将目标设置为该堆头的第二个结点，以此减少将<code>fd_nextsize</code>与<code>bk_nextsize</code>赋值的操作。</p>
+</li>
+<li><p>调用<code>unlink</code>将目标largebin chunk从双链表中取下。</p>
+</li>
+<li><p>判断剩余空间是否小于MINSIZE，如果小于直接返回给用户。</p>
+</li>
+<li><p>否则将剩余的空间构成新的chunk放入到unsorted bin中。</p>
+</li>
+</ol>
+<p>再看下<code>unlink</code>的源码：</p>
+ <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">/* Take a chunk off a bin list */</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> unlink(AV, P, BK, FD) &#123;                                            \</span></span><br><span class="line">    <span class="keyword">if</span> (__builtin_expect (chunksize(P) != (next_chunk(P))-&gt;prev_size, <span class="number">0</span>))      \</span><br><span class="line">      malloc_printerr (check_action, <span class="string">"corrupted size vs. prev_size"</span>, P, AV);  \</span><br><span class="line">    FD = P-&gt;fd;                                      \</span><br><span class="line">    BK = P-&gt;bk;                                      \</span><br><span class="line">    <span class="keyword">if</span> (__builtin_expect (FD-&gt;bk != P || BK-&gt;fd != P, <span class="number">0</span>))              \</span><br><span class="line">      malloc_printerr (check_action, <span class="string">"corrupted double-linked list"</span>, P, AV);  \</span><br><span class="line">    <span class="keyword">else</span> &#123;                                      \</span><br><span class="line">        FD-&gt;bk = BK;                                  \</span><br><span class="line">        BK-&gt;fd = FD;                                  \</span><br><span class="line">        <span class="keyword">if</span> (!in_smallbin_range (P-&gt;size)                      \</span><br><span class="line">            &amp;&amp; __builtin_expect (P-&gt;fd_nextsize != <span class="literal">NULL</span>, <span class="number">0</span>)) &#123;              \</span><br><span class="line">        <span class="keyword">if</span> (__builtin_expect (P-&gt;fd_nextsize-&gt;bk_nextsize != P, <span class="number">0</span>)          \</span><br><span class="line">        || __builtin_expect (P-&gt;bk_nextsize-&gt;fd_nextsize != P, <span class="number">0</span>))    \</span><br><span class="line">          malloc_printerr (check_action,                      \</span><br><span class="line">                   <span class="string">"corrupted double-linked list (not small)"</span>,    \</span><br><span class="line">                   P, AV);                          \</span><br><span class="line">            <span class="keyword">if</span> (FD-&gt;fd_nextsize == <span class="literal">NULL</span>) &#123;                      \</span><br><span class="line">                <span class="keyword">if</span> (P-&gt;fd_nextsize == P)                      \</span><br><span class="line">                  FD-&gt;fd_nextsize = FD-&gt;bk_nextsize = FD;              \</span><br><span class="line">                <span class="keyword">else</span> &#123;                                  \</span><br><span class="line">                    FD-&gt;fd_nextsize = P-&gt;fd_nextsize;                  \</span><br><span class="line">                    FD-&gt;bk_nextsize = P-&gt;bk_nextsize;                  \</span><br><span class="line">                    P-&gt;fd_nextsize-&gt;bk_nextsize = FD;                  \</span><br><span class="line">                    P-&gt;bk_nextsize-&gt;fd_nextsize = FD;                  \</span><br><span class="line">                  &#125;                                  \</span><br><span class="line">              &#125; <span class="keyword">else</span> &#123;                                  \</span><br><span class="line">                P-&gt;fd_nextsize-&gt;bk_nextsize = P-&gt;bk_nextsize;              \</span><br><span class="line">                P-&gt;bk_nextsize-&gt;fd_nextsize = P-&gt;fd_nextsize;              \</span><br><span class="line">              &#125;                                      \</span><br><span class="line">          &#125;                                      \</span><br><span class="line">      &#125;                                          \</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>再看看largebin的unlink检查，从代码中可以看到，就是多了<code>fd_nextsize</code>和<code>bk_nextsize</code>俩个位置的检查，原理和<code>fd</code>和<code>bk</code>的检查一致。但是需要注意的是对于存在多个满足空间的堆块来说，申请出来的是堆头的下一个结点，它的<code>fd_nextsize</code>和<code>bk_nextsize</code>为空。也就是说即使它是largebin chunk，但是它的<code>fd_nextsize</code>也为空，即不满足条件<code>__builtin_expect (P-&gt;fd_nextsize != NULL, 0)</code>，对于此类chunk的unlink，只会像smallbin的unlink一样检查<code>fd</code>与<code>bk</code>，而不会对<code>fd_nextsize</code>与<code>bk_nextsize</code>进行检查与操作。</p>
+<p>至此largebin链表的形成以及申请largebin都已经阐述清楚。再小结下，对于largebin的链表的插入，双链表是从大到小的chunk排序，相同大小的chunk会有一个堆头，只有堆头的<code>fd_nextsize</code>与<code>bk_nextsize</code>会被赋值，其余堆块的该字段为0。插入的遍历是通过<code>fd_nextsize</code>从大到小进行的，如果该插入的chunk存在对应堆头，则插入到该堆头的下一个结点，否则的话该chunk会成为堆头插入到链表中。</p>
+<p>对于largebin的申请，通过判断双链表的第一个结点（最大结点）的大小来判断是否存在满足的堆块，如果有则从小到大通过<code>bk_nextsize</code>反向遍历双链表，找到最小的满足申请需求的堆块，如果该堆头下一个结点的大小也满足则将该结点作为目标分配给用户，以此减少链表的<code>fd_nextsize</code>与<code>bk_nextsize</code>操作，提高效率。对于双链表的unlink，需要注意的就是<code>fd_nextsize</code>与<code>bk_nextsize</code>检查，特别需要注意的是当结点是堆头的下一个结点时，它的<code>fd_nextsize</code>与<code>bk_nextsize</code>为0，此时unlink操作与smallbin的unlink操作一致，没有<code>fd_nextsize</code>与<code>bk_nextsize</code>的检查与操作。</p>
+<h2 id="0x02-largebin-attack"><a href="#0x02-largebin-attack" class="headerlink" title="0x02 largebin attack"></a>0x02 largebin attack</h2><p>largebin attack是在largebin双链表的插入与取下的过程中出现问题，导致可以被申请出非预期内存的情形。总的来说存在两种攻击方式：</p>
+<ul>
+<li><p>在申请largebin的过程中，伪造largebin的<code>bk_nextsize</code>，实现非预期内存申请。</p>
+</li>
+<li><p>在largebin插入的过程中，伪造largebin的<code>bk_nextsize</code>以及<code>bk</code>，实现任意地址写堆地址。</p>
+</li>
+</ul>
+<p>下面结合源码和实例具体看这两种攻击方式。</p>
+<h3 id="2-1-伪造伪造largebin的bk-nextsize"><a href="#2-1-伪造伪造largebin的bk-nextsize" class="headerlink" title="2.1 伪造伪造largebin的bk_nextsize"></a>2.1 伪造伪造largebin的bk_nextsize</h3><h4 id="原理分析"><a href="#原理分析" class="headerlink" title="原理分析"></a>原理分析</h4><p>此利用方式是在申请largebin的过程中出现的。回到申请largebin的源码中去看，它先判断当前双链表中存在满足申请需求的堆块（判断第一个堆块的大小），然后通过<code>bk_nextsize</code>反向遍历双链表找到第一个大于申请需求的堆块，申请该堆头对应的堆块。</p>
+ <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> ((victim = first (bin)) != bin &amp;&amp;</span><br><span class="line">              (<span class="keyword">unsigned</span> <span class="keyword">long</span>) (victim-&gt;size) &gt;= (<span class="keyword">unsigned</span> <span class="keyword">long</span>) (nb)) <span class="comment">//判断链表的第一个结点，即最大的chunk是否大于要申请的size</span></span><br><span class="line">            &#123;</span><br><span class="line">              victim = victim-&gt;bk_nextsize; </span><br><span class="line">              <span class="keyword">while</span> (((<span class="keyword">unsigned</span> <span class="keyword">long</span>) (size = chunksize (victim)) &lt;</span><br><span class="line">                      (<span class="keyword">unsigned</span> <span class="keyword">long</span>) (nb))) <span class="comment">//从最小的chunk开始，反向遍历 chunk size链表，直到找到第一个大于等于所需chunk大小的chunk退出循环</span></span><br><span class="line">                victim = victim-&gt;bk_nextsize;  <span class="comment">//漏洞点，伪造bk_nextsize</span></span><br><span class="line"></span><br><span class="line">              <span class="keyword">if</span> (victim != last (bin) &amp;&amp; victim-&gt;size == victim-&gt;fd-&gt;size) <span class="comment">//申请的chunk对应的chunk存在多个结点，则申请相应堆头的下个结点，不申请堆头。</span></span><br><span class="line">                victim = victim-&gt;fd;</span><br><span class="line"></span><br><span class="line">              remainder_size = size - nb;</span><br><span class="line">              unlink (av, victim, bck, fwd); <span class="comment">//largebin unlink 操作</span></span><br><span class="line"></span><br><span class="line">            ... </span><br><span class="line">            <span class="keyword">return</span> p;</span><br></pre></td></tr></table></figure>
+
+<p>问题出现在通过<code>bk_nextsize</code>反向遍历双链表的过程，如果能够伪造某个堆头结点中的<code>bk_nextsize</code>，将其指向非预期的内存地址，构造好数据使得非预期内存地址在通过unlink的检查之后，会将该空间返回给用户，最终使得可以申请出非预期的内存。最常见的就是用它来构造overlap chunk。</p>
+<p>至于绕过<code>unlink</code>的检查，我认为最好的方式就是伪造的内存空间将<code>fd</code>与<code>bk</code>按照smallbin<code>unlink</code>的利用方式设置，而将<code>bk_nextsize</code>和<code>fd_nextsize</code>设置成0，这样就不会对这两个字段进行操作了。</p>
+<p>典型的应用场景为：存在四个堆ABCD，largebin中存在链表A-&gt;B，其中A为0x420，B为0x400，C为0x410，C未释放。将B的<code>bk_nextsize</code>伪造指向C，同时将C的<code>fd</code>与<code>bk</code>构造好，将C的<code>fd_nextsize</code>与<code>bk_nextsize</code>赋值为0，当再次申请0x410大小的内存E时，遍历<code>B-&gt;bk_nextsize</code>会指向C，且C的大小满足需求，因此会调用unlink将C从双链表取下，因此申请出来的堆块E的地址会为C的地址，即E和C为同一内存块，实现overlap chunk的构造。</p>
+
+      
+    </div>
+    
+    
+    
+
+      <div>
+        
+          <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+        
+      </div>
+
+    
+
+    
+
+    
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/largebin-attack/" rel="tag"><i class="fa fa-tag"></i> largebin_attack</a>
+          
+            <a href="/tags/heap/" rel="tag"><i class="fa fa-tag"></i> heap</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/year/04/10/clew670xl004dff3fl2i2zyw1/" rel="next" title="stdin任意地址写">
+                <i class="fa fa-chevron-left"></i> stdin任意地址写
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/year/04/26/clew670wv001xff3fwuej5g37/" rel="prev" title="awd 通打pwn脚本记录一波">
+                awd 通打pwn脚本记录一波 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="Wood">
+            
+              <p class="site-author-name" itemprop="name">Wood</p>
+              <p class="site-description motion-element" itemprop="description">stay hungry stay foolish.</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">79</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Wood1314" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:wood@nuaa.edu.cn" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#0x00-前言"><span class="nav-number">1.</span> <span class="nav-text">0x00 前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x01-lagrgebin-管理机制"><span class="nav-number">2.</span> <span class="nav-text">0x01 lagrgebin 管理机制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x02-largebin-attack"><span class="nav-number">3.</span> <span class="nav-text">0x02 largebin attack</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-伪造伪造largebin的bk-nextsize"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 伪造伪造largebin的bk_nextsize</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#原理分析"><span class="nav-number">3.1.1.</span> <span class="nav-text">原理分析</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Wood</span>
+  
+  
+</div>
+
+<div class="powered-by">
+  <i class="fa fa-user-md"></i><span id="busuanzi_container_site_uv">
+    本站访客数:<span id="busuanzi_value_site_uv"></span>
+  </span>
+</div>
+
+
+  <div class="powered-by"></div>
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitment({
+            id: window.location.pathname, 
+            owner: 'Wood1314',
+            repo: 'for_pinglun',
+            
+            oauth: {
+            
+            
+                client_secret: 'f720411d5aa74b5fbddfe66698e22296599316ec',
+            
+                client_id: '590d9ba949eb93622943'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  + <script type="text/javascript" src="/js/src/instantclick.js" data-no-instant></script>
+  + <script data-no-instant>InstantClick.init();</script>
+</body>
+</html>
