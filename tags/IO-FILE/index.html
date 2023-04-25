@@ -112,7 +112,7 @@
 <meta name="keywords" content="pwn,AI">
 <meta property="og:type" content="website">
 <meta property="og:title" content="木头的小木屋">
-<meta property="og:url" content="wood1314.github.io/tags/IO-FILE/index.html">
+<meta property="og:url" content="wood1314.github.io/tags/IO-file/index.html">
 <meta property="og:site_name" content="木头的小木屋">
 <meta property="og:description" content="stay hungry stay foolish.">
 <meta property="og:locale" content="zh-Hans">
@@ -148,13 +148,13 @@
 
 
 
-  <link rel="canonical" href="wood1314.github.io/tags/IO-FILE/">
+  <link rel="canonical" href="wood1314.github.io/tags/IO-file/">
 
 
 
 
 
-  <title>标签: IO_FILE | 木头的小木屋</title>
+  <title>标签: IO_file | 木头的小木屋</title>
   
 
 
@@ -326,7 +326,7 @@
 
     <div id="posts" class="posts-collapse">
       <div class="collection-title">
-        <h1>IO_FILE<small>标签</small>
+        <h1>IO_file<small>标签</small>
         </h1>
       </div>
 
@@ -338,95 +338,17 @@
 
       <h2 class="post-title">
         
-            <a class="post-title-link" href="/year/04/10/clgvp3n6h004h6n3fhynm6ro0/" itemprop="url">
+            <a class="post-title-link" href="/year/02/08/clgvp3n4m000s6n3forefez5d/" itemprop="url">
               
-                <span itemprop="name">stdin任意地址写</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2020-04-10T22:22:58+08:00" content="2020-04-10">
-          04-10
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-      
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/year/04/06/clgvp3n4v000y6n3flwii1cal/" itemprop="url">
-              
-                <span itemprop="name">IO_FILE_vtable_check</span>
+                <span itemprop="name">IO_file 总结</span>
               
             </a>
         
       </h2>
 
       <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2020-04-06T21:52:21+08:00" content="2020-04-06">
-          04-06
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-      
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/year/03/15/clgvp3n4r000u6n3f3kh4bncm/" itemprop="url">
-              
-                <span itemprop="name">IO_FILE leak</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2020-03-15T21:05:23+08:00" content="2020-03-15">
-          03-15
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-      
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/year/02/19/clgvp3n68003n6n3f9az0z951/" itemprop="url">
-              
-                <span itemprop="name">pwnable-tw bookwriter</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2020-02-19T15:00:22+08:00" content="2020-02-19">
-          02-19
+        <time class="post-time" itemprop="dateCreated" datetime="2020-02-08T14:11:31+08:00" content="2020-02-08">
+          02-08
         </time>
       </div>
 
@@ -490,7 +412,7 @@
               
                 <a href="/archives">
               
-                  <span class="site-state-item-count">80</span>
+                  <span class="site-state-item-count">81</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1042,6 +964,87 @@
                 if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
                   return resultRight.searchTextCount - resultLeft.searchTextCount;
                 } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  + <script type="text/javascript" src="/js/src/instantclick.js" data-no-instant></script>
+  + <script data-no-instant>InstantClick.init();</script>
+</body>
+</html>
+tCount) {
                   return resultRight.hitCount - resultLeft.hitCount;
                 } else {
                   return resultRight.id - resultLeft.id;
